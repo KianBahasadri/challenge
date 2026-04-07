@@ -1,0 +1,1 @@
+ii = lambda: int(input())
