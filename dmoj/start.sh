@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$SCRIPT_DIR"
 
 if [ "$#" -ne 1 ]; then
   printf 'Usage: %s <dmoj problem url>\n' "$0" >&2
@@ -17,5 +20,5 @@ fi
 
 mkdir -p "$problem_id"
 echo "$url" > "$problem_id/link.txt"
-cp main.py "$problem_id/main.py"
-cp main.hs "$problem_id/main.hs"
+cp "$REPO_ROOT/main.py" "$problem_id/main.py"
+cp "$REPO_ROOT/main.hs" "$problem_id/main.hs"
