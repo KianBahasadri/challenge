@@ -16,17 +16,12 @@ for _ in range(k):
     adj_list[b].append(a)
     adj_list.setdefault(a, [])
 
-while True:
+def remove(adj_list):
   for adj in adj_list:
-    if adj_list[adj] == []:
+    if [x for x in adj_list[adj] if x in adj_list] == []:
       del adj_list[adj]
-      for adj2 in adj_list:
-        adj_list[adj2] = [x for x in adj_list[adj2] if x != adj]
-      break
-  else:
-    break
+      return remove(adj_list)
+  return adj_list
 
-print(len(adj_list))
-
-  
+print(len(remove(adj_list)))
 
