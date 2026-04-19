@@ -27,4 +27,33 @@ grid = [
 [20, 73, 35, 29, 78, 31, 90,  1, 74, 31, 49, 71, 48, 86, 81, 16, 23, 57,  5, 54],
 [ 1, 70, 54, 71, 83, 51, 54, 69, 16, 92, 33, 48, 61, 43, 52,  1, 89, 19, 67, 48]]
 
-print(grid)
+count = 0
+n = 4
+
+def mult(lih):
+  x = 1
+  for num in lih:
+    x *= num
+  return x
+
+for i in range(20):
+  for j in range(20-n+1):
+    # left right
+    nums = [grid[i][j+k] for k in range(n)]
+    cnums = mult(nums)
+    count = max(count, cnums)
+for i in range(20-n+1):
+  for j in range(20):
+    # up down
+    nums = [grid[i+k][j] for k in range(n)]
+    cnums = mult(nums)
+    count = max(count, cnums)
+for i in range(20-n+1):
+  for j in range(20-n+1):
+    # diagonal
+    nums = [grid[i+k][j+k] for k in range(n)]
+    cnums = mult(nums)
+    count = max(count, cnums)
+
+print(count)
+  
