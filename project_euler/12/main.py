@@ -1,9 +1,5 @@
-from sys import exit
-from collections import defaultdict
-az = 'abcdefghijklmnopqrstuvwxyz'
-splii = lambda: map(int, input().split())
-ii = lambda: int(input())
-# --- Boilerplate ---
+from sympy import factorint
+from math import comb
 
 def factor(n):
   for i in range(2, n):
@@ -11,12 +7,12 @@ def factor(n):
         return [n] + factor(n//i) + factor(i)
   return [n]
 
-count = 0
-for i in range(10**10):
-  count += i
-  fs = set(factor(count) + [1])
-  if i % 500 == 0:
-    print(i, count, sorted(list(fs)))
-  if len(fs) > 500:
-    print(i)
-    break
+for i in range(1, 15):
+  n = int(i * (2*i + 1))
+  n2 = int(i * (2*i - 1))
+
+  fs1 = set(factor(n) + [1])
+  fs2 = set(factor(n2) + [1])
+
+  print((i, (2*i - 1)), n2, sorted(list(fs2)))
+  print((i, (2*i + 1)), n, sorted(list(fs1)))
