@@ -25,8 +25,15 @@ if [ -z "$title" ]; then
   exit 1
 fi
 
-mkdir -p "$title"
-echo "$url" > "$title/link.txt"
-cp "$REPO_ROOT/main.py" "$title/main.py"
-cp "$REPO_ROOT/main.hs" "$title/main.hs"
-cp "$REPO_ROOT/main.cpp" "$title/main.cpp"
+dirname="$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | sed -e 's/^[ ]*//' -e 's/[ ]*$//' | tr -s ' ' '_')"
+
+if [ -z "$dirname" ]; then
+  printf 'Failed to generate a valid directory name from title: %s\n' "$title" >&2
+  exit 1
+fi
+
+mkdir -p "$dirname"
+echo "$url" > "$dirname/link.txt"
+cp "$REPO_ROOT/main.py" "$dirname/main.py"
+cp "$REPO_ROOT/main.hs" "$dirname/main.hs"
+cp "$REPO_ROOT/main.cpp" "$dirname/main.cpp"
