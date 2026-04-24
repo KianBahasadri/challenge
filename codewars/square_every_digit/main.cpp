@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
-#include <cmath>
 
 int square_digits(int num) {
   std::string out;
-  for (char c: std::to_string(num)) {
-    out += std::to_string(std::pow(c - '0', 2));
+  for (char c : std::to_string(num)) {
+    int digit = c - '0';
+    out += std::to_string(digit * digit);
   }
  return std::stoi(out);
 }
