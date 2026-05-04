@@ -1,0 +1,26 @@
+[project]
+name = "cptop"
+version = "0.1.0"
+description = "A btop-inspired terminal dashboard for competitive-programming progress."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "textual>=0.89.1",
+]
+
+[project.scripts]
+cptop = "cptop.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.24.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
