@@ -92,7 +92,7 @@ if [ -z "$problems" ]; then
 fi
 
 printf 'Problems in %s/%s:\n' "$division" "$module"
-awk -F '\t' '{ printf "%2d. [%s] %s", NR, $2, $5; if ($3 != "") printf " (%s)", $3; printf "\n    %s\n", $4 }' <<< "$problems"
+awk -F '\t' '{ printf "%2d. [%s] %s", NR, $2, $5; if ($3 != "") printf " (%s)", $3; printf "\n" }' <<< "$problems"
 
 if [ "$list_only" -eq 1 ]; then
   exit 0
@@ -105,11 +105,8 @@ while IFS= read -r row; do
   dir_slug="$(slugify "$problem_id-$title")"
   problem_dir="$division/$module/$dir_slug"
 
-  if [ -d "$problem_dir" ]; then
-    status="Exists"
-  else
+  if [ ! -d "$problem_dir" ]; then
     mkdir -p "$problem_dir"
-    status="Created"
   fi
 
   [ -e "$problem_dir/link.txt" ] || printf '%s\n' "$url" > "$problem_dir/link.txt"
@@ -117,6 +114,4 @@ while IFS= read -r row; do
   [ -e "$problem_dir/main.py" ] || cp "$REPO_ROOT/main.py" "$problem_dir/main.py"
   [ -e "$problem_dir/main.hs" ] || cp "$REPO_ROOT/main.hs" "$problem_dir/main.hs"
   [ -e "$problem_dir/main.cpp" ] || cp "$REPO_ROOT/main.cpp" "$problem_dir/main.cpp"
-
-  printf '%s %s\n' "$status" "$problem_dir"
 done <<< "$problems"
