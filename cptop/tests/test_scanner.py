@@ -25,3 +25,18 @@ def test_scan_workspace_detects_problem_dirs_and_solved_markers(tmp_path: Path) 
         "cses/two": False,
         "project_euler/1": True,
     }
+    assert all(problem.started_on for problem in problems)
+    assert all(" " in (problem.started_on or "") for problem in problems)
+
+
+def test_scan_workspace_detects_nested_usaco_guide_problems(tmp_path: Path) -> None:
+    problem = tmp_path / "usaco.guide" / "silver" / "prefix-sums" / "breed-counting"
+    problem.mkdir(parents=True)
+    (problem / "link.txt").write_text("https://example.com/usaco", encoding="utf-8")
+    (problem / "submission.txt").write_text("", encoding="utf-8")
+
+    problems = scan_workspace(tmp_path)
+
+    assert [problem.key for problem in problems] == ["usaco/silver/prefix-sums/breed-counting"]
+    assert problems[0].solved is True
+    assert problems[0].started_on

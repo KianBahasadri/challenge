@@ -17,12 +17,14 @@ def test_dashboard_stats_groups_platforms_and_tags(tmp_path: Path) -> None:
     write_problem(tmp_path, "alpha", "a", True)
     write_problem(tmp_path, "alpha", "b", False)
     write_problem(tmp_path, "beta", "c", True)
+    write_problem(tmp_path, "beta", "d", True)
     tag_file = tmp_path / "tags.json"
     tag_file.write_text(
         json.dumps(
             {
-                "alpha/a": {"tags": ["math", "greedy"]},
-                "alpha/b": {"tags": ["math"]},
+                "alpha/a": {"tags": ["arrays", "greedy", "not-real"]},
+                "alpha/b": {"tags": ["arrays"]},
+                "beta/d": {"tags": ["greedy"]},
             }
         ),
         encoding="utf-8",
@@ -30,11 +32,13 @@ def test_dashboard_stats_groups_platforms_and_tags(tmp_path: Path) -> None:
 
     stats = build_dashboard_stats(scan_workspace(tmp_path), tmp_path, tag_file)
 
-    assert stats.solved == 2
-    assert stats.total == 3
+    assert stats.solved == 3
+    assert stats.total == 4
     assert stats.missing_tag_keys == ("beta/c",)
-    assert {platform.name: platform.solved for platform in stats.platform_stats} == {"alpha": 1, "beta": 1}
+    assert [(platform.name, platform.solved) for platform in stats.platform_stats] == [("beta", 2), ("alpha", 1)]
     assert {tag.name: (tag.solved, tag.total) for tag in stats.tag_stats} == {
-        "math": (1, 2),
-        "greedy": (1, 1),
+        "arrays": (1, 2),
+        "greedy": (2, 2),
     }
+    assert "not-real" not in {tag.name for tag in stats.tag_stats}
+    assert any("Skipping unknown tag for alpha/a: not-real" == warning for warning in stats.warnings)

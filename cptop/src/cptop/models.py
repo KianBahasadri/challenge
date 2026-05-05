@@ -11,6 +11,8 @@ class Problem:
     path: Path
     solved: bool
     link: str | None = None
+    started_on: str | None = None
+    started_at: float | None = None
 
     @property
     def key(self) -> str:

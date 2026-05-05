@@ -1,224 +1,177 @@
 {
     "codewars/Abbreviate a Two Word Name": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "codewars/Grasshopper - Summation": {
         "tags": [
-            "math",
-            "easy"
+            "combinatorics"
         ],
         "difficulty": "easy"
     },
     "codewars/Returning Strings": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "codewars/Reversed Strings": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "codewars/directions_reduction": {
         "tags": [
             "arrays",
-            "stack",
-            "medium"
+            "stack"
         ],
-        "difficulty": "medium",
-        "notes": "Reduce opposite directions"
+        "difficulty": "medium"
     },
     "codewars/disemvowel_trolls": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "codewars/find_the_odd_int": {
         "tags": [
-            "arrays",
-            "math",
-            "easy"
+            "bitmasks",
+            "frequency-counting"
         ],
-        "difficulty": "easy",
-        "notes": "XOR or frequency map"
+        "difficulty": "easy"
     },
     "codewars/human_readable_duration_format": {
         "tags": [
-            "strings",
-            "math",
-            "hard"
+            "modular-arithmetic",
+            "simulation"
         ],
-        "difficulty": "medium",
-        "notes": "Time formatting"
+        "difficulty": "medium"
     },
     "codewars/if_you_can39t_sleep_just_count_sheep": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "codewars/moving_zeros_to_the_end": {
         "tags": [
             "arrays",
-            "easy"
+            "two-pointers"
         ],
         "difficulty": "easy"
     },
     "codewars/multiples_of_3_or_5": {
         "tags": [
-            "math",
-            "easy"
+            "combinatorics",
+            "number-theory"
         ],
         "difficulty": "easy"
     },
     "codewars/rgb_to_hex_conversion": {
         "tags": [
-            "math",
-            "strings",
-            "medium"
+            "simulation"
         ],
         "difficulty": "easy"
     },
     "codewars/rot13": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "codewars/simple_pig_latin": {
-        "tags": [
-            "strings",
-            "medium"
-        ],
+        "tags": [],
         "difficulty": "medium"
     },
     "codewars/square_every_digit": {
         "tags": [
-            "math",
-            "strings",
-            "easy"
+            "simulation"
         ],
         "difficulty": "easy"
     },
     "codewars/stop_gninnips_my_sdrow": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "codewars/sum_of_digits_digital_root": {
         "tags": [
-            "math",
-            "easy"
+            "modular-arithmetic",
+            "number-theory"
         ],
         "difficulty": "easy"
     },
     "codewars/the_hashtag_generator": {
-        "tags": [
-            "strings",
-            "medium"
-        ],
+        "tags": [],
         "difficulty": "medium"
     },
     "codewars/vowel_count": {
         "tags": [
-            "strings",
-            "easy"
+            "frequency-counting"
         ],
         "difficulty": "easy"
     },
     "codewars/who_likes_it": {
-        "tags": [
-            "strings",
-            "easy"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "cses/1068-weird-algorithm": {
         "tags": [
-            "simulation",
-            "math"
+            "number-theory",
+            "simulation"
         ],
-        "difficulty": "easy",
-        "notes": "Collatz conjecture"
+        "difficulty": "easy"
     },
     "cses/1069-repetitions": {
         "tags": [
-            "strings"
+            "sliding-window"
         ],
-        "difficulty": "easy",
-        "notes": "Longest consecutive repeating characters"
+        "difficulty": "easy"
     },
     "cses/1083-missing-number": {
         "tags": [
-            "math"
+            "arrays",
+            "combinatorics"
         ],
-        "difficulty": "easy",
-        "notes": "Sum formula"
+        "difficulty": "easy"
     },
     "cses/1094-increasing-array": {
         "tags": [
-            "greedy",
-            "arrays"
+            "arrays",
+            "greedy"
         ],
-        "difficulty": "easy",
-        "notes": "Keep track of max"
+        "difficulty": "easy"
     },
     "dmoj/acsl1p4": {
         "tags": [
             "graphs",
-            "dfs"
+            "topological-sort"
         ],
         "difficulty": "medium"
     },
     "dmoj/ccc02j1": {
-        "tags": [
-            "implementation"
-        ],
+        "tags": [],
         "difficulty": "easy"
     },
     "dmoj/ccc07j1": {
         "tags": [
-            "math"
+            "sorting"
         ],
         "difficulty": "easy"
     },
     "dmoj/ccc13j1": {
         "tags": [
-            "math"
+            "combinatorics"
         ],
         "difficulty": "easy"
     },
     "dmoj/ccc14j2": {
         "tags": [
-            "strings",
-            "implementation"
+            "frequency-counting"
         ],
         "difficulty": "easy"
     },
     "dmoj/ccc24j2": {
         "tags": [
-            "implementation"
+            "simulation"
         ],
         "difficulty": "easy"
     },
     "dmoj/ccc24j3": {
         "tags": [
             "arrays",
-            "implementation"
+            "frequency-counting",
+            "sorting"
         ],
         "difficulty": "easy"
     },
@@ -230,130 +183,134 @@
     },
     "dmoj/ccc24s2": {
         "tags": [
-            "strings",
-            "arrays"
+            "frequency-counting"
         ],
         "difficulty": "medium"
     },
     "dmoj/ccc25j1": {
         "tags": [
-            "implementation"
+            "simulation"
         ],
         "difficulty": "easy"
     },
     "dmoj/ccc25j2": {
         "tags": [
-            "implementation"
+            "simulation"
         ],
         "difficulty": "easy"
     },
     "dmoj/ccc99s1": {
         "tags": [
-            "implementation",
+            "arrays",
             "simulation"
         ],
         "difficulty": "easy"
     },
     "dmoj/cco07p2": {
         "tags": [
-            "sorting",
-            "hashing"
+            "hashing",
+            "sorting"
         ],
-        "difficulty": "medium",
-        "notes": "Snowflakes"
+        "difficulty": "medium"
     },
     "dmoj/helloworld": {
         "tags": [
-            "implementation"
+            "constructive"
         ],
         "difficulty": "easy"
     },
     "dmoj/mccc4j1": {
         "tags": [
-            "math",
-            "implementation"
+            "simulation"
         ],
         "difficulty": "easy"
     },
     "project_euler/1": {
         "tags": [
-            "math"
+            "combinatorics",
+            "number-theory"
         ],
-        "difficulty": "easy",
-        "notes": "Multiples of 3 or 5"
+        "difficulty": "easy"
     },
     "project_euler/10": {
         "tags": [
-            "math",
-            "number-theory"
+            "number-theory",
+            "primes"
         ],
-        "difficulty": "medium",
-        "notes": "Summation of primes, Sieve of Eratosthenes"
+        "difficulty": "medium"
     },
     "project_euler/2": {
         "tags": [
-            "math",
-            "dp"
+            "dp",
+            "number-theory"
         ],
-        "difficulty": "easy",
-        "notes": "Even Fibonacci numbers"
+        "difficulty": "easy"
     },
     "project_euler/3": {
         "tags": [
-            "math",
-            "number-theory"
+            "number-theory",
+            "primes"
         ],
-        "difficulty": "easy",
-        "notes": "Largest prime factor"
+        "difficulty": "easy"
     },
     "project_euler/4": {
         "tags": [
-            "math",
-            "brute-force",
-            "strings"
+            "brute-force"
         ],
-        "difficulty": "easy",
-        "notes": "Largest palindrome product"
+        "difficulty": "easy"
     },
     "project_euler/5": {
         "tags": [
-            "math",
+            "modular-arithmetic",
             "number-theory"
         ],
-        "difficulty": "easy",
-        "notes": "Smallest multiple, LCM"
+        "difficulty": "easy"
     },
     "project_euler/6": {
         "tags": [
-            "math"
+            "combinatorics"
         ],
-        "difficulty": "easy",
-        "notes": "Sum square difference"
+        "difficulty": "easy"
     },
     "project_euler/7": {
         "tags": [
-            "math",
-            "number-theory"
+            "number-theory",
+            "primes"
         ],
-        "difficulty": "easy",
-        "notes": "10001st prime"
+        "difficulty": "easy"
     },
     "project_euler/8": {
         "tags": [
-            "strings",
-            "math",
-            "arrays"
+            "arrays",
+            "sliding-window"
         ],
-        "difficulty": "easy",
-        "notes": "Largest product in a series"
+        "difficulty": "easy"
     },
     "project_euler/9": {
         "tags": [
-            "math",
+            "brute-force",
             "geometry",
-            "brute-force"
+            "number-theory"
         ],
-        "difficulty": "easy",
-        "notes": "Special Pythagorean triplet"
+        "difficulty": "easy"
+    },
+    "codechef/avgproblem": {
+        "tags": [
+            "simulation"
+        ],
+        "difficulty": "easy"
+    },
+    "codechef/subscribe_": {
+        "tags": [
+            "combinatorics"
+        ],
+        "difficulty": "easy"
+    },
+    "usaco/silver/prefix-sums/ys-staticrangesum-static-range-sum": {
+        "tags": [
+            "arrays",
+            "prefix-sums"
+        ],
+        "difficulty": "medium"
     }
 }
