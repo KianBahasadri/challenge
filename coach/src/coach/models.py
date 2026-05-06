@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -11,19 +11,12 @@ class Problem:
     path: Path
     solved: bool
     link: str | None = None
-    started_on: str | None = None
     started_at: float | None = None
+    started_on: str | None = None
 
     @property
     def key(self) -> str:
         return f"{self.platform}/{self.name}"
-
-
-@dataclass(frozen=True)
-class ProblemTags:
-    tags: tuple[str, ...] = ()
-    difficulty: str | None = None
-    notes: str | None = None
 
 
 @dataclass(frozen=True)
@@ -44,32 +37,10 @@ class PlatformStats:
 
 
 @dataclass(frozen=True)
-class TagStats:
-    name: str
-    solved: int = 0
-    total: int = 0
-
-    @property
-    def unsolved(self) -> int:
-        return self.total - self.solved
-
-    @property
-    def percent(self) -> float:
-        if self.total == 0:
-            return 0.0
-        return self.solved / self.total * 100
-
-
-@dataclass(frozen=True)
-class DashboardStats:
-    problems: tuple[Problem, ...]
-    platform_stats: tuple[PlatformStats, ...]
-    tag_stats: tuple[TagStats, ...]
-    missing_tag_keys: tuple[str, ...]
-    tag_count: int
+class WorkspaceStats:
     workspace: Path
-    tag_file: Path
-    warnings: tuple[str, ...] = field(default_factory=tuple)
+    problems: tuple[Problem, ...]
+    platforms: tuple[PlatformStats, ...]
 
     @property
     def solved(self) -> int:

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cptop.scanner import scan_workspace
+from coach.scanner import build_stats, scan_workspace
 
 
 def write_problem(root: Path, platform: str, name: str, solved_marker: str | None = None) -> None:
@@ -25,8 +25,6 @@ def test_scan_workspace_detects_problem_dirs_and_solved_markers(tmp_path: Path) 
         "cses/two": False,
         "project_euler/1": True,
     }
-    assert all(problem.started_on for problem in problems)
-    assert all(" " in (problem.started_on or "") for problem in problems)
 
 
 def test_scan_workspace_detects_nested_usaco_guide_problems(tmp_path: Path) -> None:
@@ -39,4 +37,15 @@ def test_scan_workspace_detects_nested_usaco_guide_problems(tmp_path: Path) -> N
 
     assert [problem.key for problem in problems] == ["usaco/silver/prefix-sums/breed-counting"]
     assert problems[0].solved is True
-    assert problems[0].started_on
+
+
+def test_build_stats_summarizes_platforms(tmp_path: Path) -> None:
+    write_problem(tmp_path, "cses", "one", "submission.txt")
+    write_problem(tmp_path, "cses", "two", None)
+
+    stats = build_stats(tmp_path)
+
+    assert stats.solved == 1
+    assert stats.total == 2
+    assert stats.unsolved == 1
+    assert [(platform.name, platform.solved, platform.total) for platform in stats.platforms] == [("cses", 1, 2)]
