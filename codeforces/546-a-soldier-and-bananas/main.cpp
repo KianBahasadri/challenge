@@ -9,7 +9,10 @@ int main() {
   std::ios_base::sync_with_stdio(false);
   std::cin.tie(NULL);
   // std::string problemname = "name";
-  // freopen((problemname + ".in").c_str(), "r", stdin); // file io
-  // freopen((problemname + ".out").c_str(), "w", stdout);
-  
+  // freopen(problemname + ".in", "r", stdin); // file io
+  // freopen(problemname + ".out", "w", stdout);
+  int k, n, w;
+  std::cin >> k >> n >> w;
+  std::cout << std::max((w+1)*w*k/2 - n, 0) << '\n';
+  return 0;  
 }

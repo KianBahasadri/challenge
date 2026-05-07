@@ -18,7 +18,8 @@ class StartError(Exception):
 
 def fetch_text(url: str) -> str:
     try:
-        with urllib.request.urlopen(url) as response:
+        request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(request) as response:
             return response.read().decode("utf-8", errors="replace")
     except URLError as exc:
         raise StartError(f"Failed to fetch {url}: {exc}") from exc
