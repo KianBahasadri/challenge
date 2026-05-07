@@ -12,14 +12,14 @@ File conventions:
   |-- <problem>/test1.txt            # optional local fixture
   |-- <problem>/expected.txt         # optional expected fixture output
   |-- <problem>/output.txt           # optional captured fixture output
-  |-- <platform>/start.sh            # create a new problem dir when present
-  |-- <platform>/unsolved.sh         # list unsolved dirs when present
+  |-- <platform>/start.py            # symlink to root starter for that platform
+  |-- <platform>/unsolved.sh         # symlink to root unsolved lister
   `-- project_euler/pyproject.toml / uv.lock / .python-version
   ```
-- `start.sh` scripts take one platform URL, validate/extract a problem id or title, create the problem directory, write `link.txt`, and copy root `main.py`, `main.hs`, and `main.cpp` into it.
-- `start.sh` directory naming is platform-specific: some scripts use a URL suffix, others derive a slug from the fetched page title.
-- `unsolved.sh` prints child directories missing that platform's solved marker, either `submission.txt` or `completed`.
-- `unsolved.sh --open` also opens each unsolved problem's `link.txt` with Firefox.
+- Run `<platform>/start.py <url>` to validate/extract a problem id or title, create a fresh problem directory, write `link.txt`, and copy root `main.py`, `main.hs`, and `main.cpp` into it.
+- `start.py` refuses to continue if the generated problem directory already exists; directory naming is platform-specific.
+- Run `<platform>/unsolved.sh` to print child directories missing that platform's solved marker, either `submission.txt` or `completed`.
+- `<platform>/unsolved.sh --open` also opens each unsolved problem's `link.txt` with Firefox.
 - Many directories contain spaces in their names; always quote those paths in shell commands.
 - Some directories include local fixtures like `test.txt`, prefer those for focused verification instead of inventing new harnesses.
 

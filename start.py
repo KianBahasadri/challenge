@@ -40,6 +40,9 @@ def create_problem(platform_dir: Path, repo_root: Path, dirname: str, url: str) 
         raise StartError("Generated an empty problem directory name")
 
     problem_dir = platform_dir / dirname
+    if problem_dir.exists():
+        raise StartError(f"Problem directory already exists: {problem_dir}")
+
     problem_dir.mkdir(parents=True, exist_ok=True)
     (problem_dir / "link.txt").write_text(f"{url}\n")
 
