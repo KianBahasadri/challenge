@@ -222,15 +222,23 @@ PARSERS = {
 }
 
 
+def print_usage(program: str, platform: str, file=sys.stdout) -> None:
+    label = platform.replace("_", " ").title()
+    print(f"Usage: {program} <{label} problem url>", file=file)
+
+
 def main(argv: list[str]) -> int:
     invoked = Path(argv[0])
     platform_dir = (Path.cwd() / invoked.parent).resolve() if not invoked.is_absolute() else invoked.parent.resolve()
     repo_root = platform_dir.parent
     platform = platform_dir.name
 
+    if len(argv) == 2 and argv[1] in ("-h", "--help"):
+        print_usage(argv[0], platform)
+        return 0
+
     if len(argv) != 2:
-        label = platform.replace("_", " ").title()
-        print(f"Usage: {argv[0]} <{label} problem url>", file=sys.stderr)
+        print_usage(argv[0], platform, file=sys.stderr)
         return 1
 
     url = argv[1]

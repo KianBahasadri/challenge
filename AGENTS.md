@@ -9,7 +9,7 @@ File conventions:
   |-- <problem>/submission.txt       # accepted submission URL
   |-- <problem>/completed            # empty solved marker
   |-- <platform>/start.py            # symlink to root starter for that platform
-  |-- <platform>/unsolved.sh         # symlink to root unsolved lister
+  |-- <platform>/unsolved.py         # symlink to root unsolved lister
   `-- project_euler/pyproject.toml / uv.lock / .python-version
   ```
 
