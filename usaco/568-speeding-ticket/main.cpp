@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <string>
-#include <array>
+#include <vector>
 
 bool isvowel(char v) { return (0x208222>>(v&0x1f))&1; }
 // https://stackoverflow.com/a/47846874
@@ -15,27 +15,26 @@ int main() {
 
   int n, m;
   std::cin >> n >> m;
-  std::array<std::array<int, 2>, n> roads;
-  std::array<std::array<int, 2>, m> speeds;
+  std::vector<int> limits;
+  std::vector<int> speeds;
   for (int i=0; i < n;i++) {
-    std::cin >> roads[i][0] >> roads[i][1];
-    if (i > 0) {
-      roads[i][0] += roads[i-1][0];
+    int segment, speed;
+    std::cin >> segment >> speed;
+    for (int j=0; j<segment;j++) {
+      limits.push_back(speed);
     }
   }
   for (int i=0; i < m;i++) {
-    std::cin >> speeds[i][0] >> speeds[i][1];
-    if (i > 0) {
-      speeds[i][0] += speeds[i-1][0];
+    int segment, speed;
+    std::cin >> segment >> speed;
+    for (int j=0; j<segment;j++) {
+      speeds.push_back(speed);
     }
   }
   int max = 0;
-  int travelled = 0;
-  for (int i=0; i < m;) {
-    if (travelled < roads[i]) {
-      
-      
-
-
-  
+  for (int i=0; i < 100;i++) {
+      max = std::max(max, speeds[i]-limits[i]);
+  }
+  std::cout << max << '\n';
+  return 0;
 }
