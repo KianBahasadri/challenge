@@ -6,6 +6,7 @@ import html
 import json
 import re
 import shutil
+import subprocess
 import sys
 import urllib.request
 from pathlib import Path
@@ -22,7 +23,16 @@ def fetch_text(url: str) -> str:
         with urllib.request.urlopen(request) as response:
             return response.read().decode("utf-8", errors="replace")
     except URLError as exc:
-        raise StartError(f"Failed to fetch {url}: {exc}") from exc
+        try:
+            result = subprocess.run(
+                ["curl", "-L", "-s", "--fail", "--max-time", "15", url],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return result.stdout
+        except (OSError, subprocess.CalledProcessError) as curl_exc:
+            raise StartError(f"Failed to fetch {url}: {exc}; curl fallback failed: {curl_exc}") from exc
 
 
 def slug_hyphen(text: str) -> str:
@@ -90,28 +100,112 @@ def parse_codeforces(url: str) -> str:
             r"https?://codeforces\.com/problemset/problem/([0-9]+)/([^/?#]+)/?", url
         )
     if not match:
+        match = re.fullmatch(r"https?://codeforces\.com/gym/([0-9]+)/problem/([^/?#]+)/?", url)
+    if not match:
         raise StartError(
             "Invalid Codeforces problem URL "
-            f"(expected .../contest/<id>/problem/<index> or .../problemset/problem/<id>/<index>): {url}"
+            "(expected .../contest/<id>/problem/<index>, "
+            ".../problemset/problem/<id>/<index>, or .../gym/<id>/problem/<index>): "
+            f"{url}"
         )
 
     contest_id = int(match.group(1))
     problem_index = match.group(2).lower()
-    data = json.loads(fetch_text("https://codeforces.com/api/problemset.problems"))
-
-    title = ""
-    for problem in data["result"]["problems"]:
-        if (
-            problem.get("contestId") == contest_id
-            and problem.get("index", "").upper() == problem_index.upper()
-        ):
-            title = problem["name"]
-            break
+    title = codeforces_problem_title(contest_id, problem_index, url)
 
     if not title:
         raise StartError(f"Failed to extract Codeforces title from: {url}")
 
     return f"{contest_id}-{problem_index}-{slug_hyphen(title)}"
+
+
+def codeforces_problem_title(contest_id: int, problem_index: str, url: str) -> str:
+    title = ""
+    api_urls = (
+        f"https://codeforces.com/api/contest.standings?contestId={contest_id}",
+        "https://codeforces.com/api/problemset.problems",
+    )
+
+    for api_url in api_urls:
+        try:
+            data = json.loads(fetch_text(api_url))
+        except (StartError, json.JSONDecodeError):
+            continue
+
+        problems = data.get("result", {}).get("problems", [])
+        for problem in problems:
+            if (
+                problem.get("contestId") == contest_id
+                and problem.get("index", "").upper() == problem_index.upper()
+            ):
+                title = problem["name"]
+                break
+
+        if title:
+            break
+
+    if not title:
+        title = codeforces_page_title(url)
+
+    if not title:
+        mirror_url = url.replace("https://codeforces.com/", "https://mirror.codeforces.com/")
+        mirror_url = mirror_url.replace("http://codeforces.com/", "https://mirror.codeforces.com/")
+        title = codeforces_page_title(mirror_url)
+
+    if not title:
+        title = codeforces_contest_table_title(contest_id, problem_index, url)
+
+    return title
+
+
+def clean_codeforces_title(title: str) -> str:
+    title = re.sub(r"<[^>]+>", "", title)
+    title = re.sub(r"^[A-Z0-9]+\.\s*", "", html.unescape(title))
+    return re.sub(r"\s+", " ", title).strip()
+
+
+def codeforces_page_title(url: str) -> str:
+    try:
+        page = fetch_text(url)
+    except StartError:
+        return ""
+
+    title_match = re.search(
+        r'<div[^>]*class="[^"]*\btitle\b[^"]*"[^>]*>\s*(.*?)\s*</div>',
+        page,
+        re.I | re.S,
+    )
+    if not title_match:
+        return ""
+
+    return clean_codeforces_title(title_match.group(1))
+
+
+def codeforces_contest_table_title(contest_id: int, problem_index: str, url: str) -> str:
+    kind_match = re.search(r"codeforces\.com/(contest|gym)/", url)
+    if not kind_match:
+        return ""
+
+    kind = kind_match.group(1)
+    problem_path = f"/{kind}/{contest_id}/problem/{problem_index.upper()}"
+    contest_url = f"https://mirror.codeforces.com/{kind}/{contest_id}"
+
+    try:
+        page = fetch_text(contest_url)
+    except StartError:
+        return ""
+
+    link_matches = re.findall(
+        rf'href="{re.escape(problem_path)}"[^>]*>\s*(?:<!--.*?-->\s*)?(.+?)\s*(?:<!--.*?-->\s*)?</a>',
+        page,
+        re.I | re.S,
+    )
+    for link_text in link_matches:
+        title = clean_codeforces_title(link_text)
+        if title and title.upper() != problem_index.upper():
+            return title
+
+    return ""
 
 
 def parse_codewars(url: str) -> str:
