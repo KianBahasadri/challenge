@@ -23,13 +23,18 @@ LANGUAGES = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a post-AC review.md for a solved problem from an accepted code file."
+        description="Create a review.md for a problem from a code file."
     )
-    parser.add_argument("code_file", help="path to the accepted solution file")
+    parser.add_argument("code_file", help="path to the solution file")
     parser.add_argument(
         "--force",
         action="store_true",
         help="overwrite an existing review.md",
+    )
+    parser.add_argument(
+        "--unsolved",
+        action="store_true",
+        help="allow creating review.md before submission.txt or completed exists",
     )
     return parser.parse_args()
 
@@ -62,7 +67,7 @@ def replace_once(text: str, old: str, new: str) -> str:
     return text.replace(old, new, 1)
 
 
-def build_review(template: str, problem_dir: Path, code_file: Path) -> str:
+def build_review(template: str, problem_dir: Path, code_file: Path, unsolved: bool) -> str:
     link = read_optional(problem_dir / "link.txt") or "Paste the statement/link here."
     code = code_file.read_text()
 
@@ -71,6 +76,11 @@ def build_review(template: str, problem_dir: Path, code_file: Path) -> str:
         review,
         "review-date: # YYYY-MM-DD",
         f"review-date: {date.today().isoformat()} # YYYY-MM-DD",
+    )
+    review = replace_once(
+        review,
+        "completed: yes # yes | no",
+        f"completed: {'no' if unsolved else 'yes'} # yes | no",
     )
     review = replace_once(review, "Paste the statement/link here.", link)
     review = replace_once(
@@ -81,7 +91,7 @@ def build_review(template: str, problem_dir: Path, code_file: Path) -> str:
     return review
 
 
-def create_review(code_file: Path, force: bool) -> Path:
+def create_review(code_file: Path, force: bool, unsolved: bool) -> Path:
     repo_root = Path(__file__).resolve().parent
     template_path = repo_root / "review.md"
 
@@ -95,16 +105,21 @@ def create_review(code_file: Path, force: bool) -> Path:
         raise ReviewError(f"Expected a code file, got: {code_file}")
 
     problem_dir = code_file.parent
-    if not (problem_dir / "submission.txt").exists() and not (problem_dir / "completed").exists():
+    if (
+        not unsolved
+        and not (problem_dir / "submission.txt").exists()
+        and not (problem_dir / "completed").exists()
+    ):
         raise ReviewError(
-            f"Problem does not look solved yet: missing submission.txt or completed in {problem_dir}"
+            f"Problem does not look solved yet: missing submission.txt or completed in {problem_dir} "
+            "(use --unsolved to override)"
         )
 
     output_path = problem_dir / "review.md"
     if output_path.exists() and not force:
         raise ReviewError(f"Review already exists: {output_path} (use --force to overwrite)")
 
-    review = build_review(template_path.read_text(), problem_dir, code_file)
+    review = build_review(template_path.read_text(), problem_dir, code_file, unsolved)
     output_path.write_text(review)
     return output_path
 
@@ -112,7 +127,7 @@ def create_review(code_file: Path, force: bool) -> Path:
 def main() -> int:
     args = parse_args()
     try:
-        output_path = create_review(Path(args.code_file), args.force)
+        output_path = create_review(Path(args.code_file), args.force, args.unsolved)
     except ReviewError as exc:
         print(exc)
         return 1

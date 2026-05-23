@@ -2,6 +2,7 @@
 redo: # yes | no
 rating: # /10
 review-date: # YYYY-MM-DD
+completed: yes # yes | no
 ---
 ## Problem
 Paste the statement/link here.
