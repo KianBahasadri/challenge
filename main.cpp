@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <string>
+#include <vector>
 
 bool isvowel(char v) { return (0x208222>>(v&0x1f))&1; }
 // https://stackoverflow.com/a/47846874
