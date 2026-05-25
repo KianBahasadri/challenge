@@ -17,12 +17,15 @@ def main(argv: list[str]) -> int:
     script_dir = Path(argv[0]).absolute().parent
     open_links = "--open" in argv[1:]
 
-    for d in sorted(script_dir.iterdir()):
-        if d.name.startswith(".") or not d.is_dir():
-            continue
+    problem_dirs = sorted(
+        link.parent
+        for link in script_dir.rglob("link.txt")
+        if not any(part.startswith(".") for part in link.relative_to(script_dir).parts)
+    )
 
+    for d in problem_dirs:
         if not (d / "submission.txt").is_file() and not (d / "completed").is_file():
-            print(d.name)
+            print(d.relative_to(script_dir))
             link = d / "link.txt"
             if open_links and link.is_file():
                 subprocess.run(["firefox", link.read_text().strip()], check=True)
