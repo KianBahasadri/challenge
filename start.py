@@ -45,7 +45,14 @@ def slug_codewars(text: str) -> str:
     return re.sub(r" +", "_", cleaned)
 
 
-def create_problem(platform_dir: Path, repo_root: Path, dirname: str, url: str) -> None:
+LANGUAGE_TEMPLATES = {
+    "--cpp": "main.cpp",
+    "--py": "main.py",
+    "--hs": "main.hs",
+}
+
+
+def create_problem(platform_dir: Path, repo_root: Path, dirname: str, url: str, template: str) -> None:
     if not dirname:
         raise StartError("Generated an empty problem directory name")
 
@@ -56,8 +63,7 @@ def create_problem(platform_dir: Path, repo_root: Path, dirname: str, url: str) 
     problem_dir.mkdir(parents=True, exist_ok=True)
     (problem_dir / "link.txt").write_text(f"{url}\n")
 
-    for template in ("main.py", "main.hs", "main.cpp"):
-        shutil.copyfile(repo_root / template, problem_dir / template)
+    shutil.copyfile(repo_root / template, problem_dir / template)
 
 
 def parse_atcoder(url: str) -> str:
@@ -318,7 +324,7 @@ PARSERS = {
 
 def print_usage(program: str, platform: str, file=sys.stdout) -> None:
     label = platform.replace("_", " ").title()
-    print(f"Usage: {program} <{label} problem url>", file=file)
+    print(f"Usage: {program} [--cpp|--py|--hs] <{label} problem url>", file=file)
 
 
 def main(argv: list[str]) -> int:
@@ -331,22 +337,30 @@ def main(argv: list[str]) -> int:
         print_usage(argv[0], platform)
         return 0
 
-    if len(argv) != 2:
+    if len(argv) == 2:
+        template = LANGUAGE_TEMPLATES["--cpp"]
+        url = argv[1]
+    elif len(argv) == 3:
+        language_flag = argv[1]
+        template = LANGUAGE_TEMPLATES.get(language_flag)
+        if template is None:
+            print_usage(argv[0], platform, file=sys.stderr)
+            return 1
+        url = argv[2]
+    else:
         print_usage(argv[0], platform, file=sys.stderr)
         return 1
-
-    url = argv[1]
     try:
         if platform == "project_euler":
             dirname, description = parse_project_euler(url)
-            create_problem(platform_dir, repo_root, dirname, url)
+            create_problem(platform_dir, repo_root, dirname, url, template)
             (platform_dir / dirname / "description.md").write_text(description)
         else:
             parser = PARSERS.get(platform)
             if parser is None:
                 raise StartError(f"Unsupported platform directory: {platform}")
             dirname = parser(url)
-            create_problem(platform_dir, repo_root, dirname, url)
+            create_problem(platform_dir, repo_root, dirname, url, template)
     except StartError as exc:
         print(exc, file=sys.stderr)
         return 1
