@@ -271,6 +271,16 @@ def parse_hackerrank(url: str) -> str:
     return match.group(1)
 
 
+def parse_kattis(url: str) -> str:
+    match = re.fullmatch(r"https?://open\.kattis\.com/problems/([^/?#]+)/?", url)
+    if not match:
+        raise StartError(
+            f"Invalid Kattis problem URL (expected https://open.kattis.com/problems/<problem_id>): {url}"
+        )
+
+    return match.group(1).lower().replace("_", "-")
+
+
 def parse_project_euler(url: str) -> tuple[str, str]:
     match = re.fullmatch(r"https?://(?:www\.)?projecteuler\.net/problem=([0-9]+)/?", url)
     if not match:
@@ -317,6 +327,7 @@ PARSERS = {
     "cses": parse_cses,
     "dmoj": parse_dmoj,
     "hackerrank": parse_hackerrank,
+    "kattis": parse_kattis,
     "usaco": parse_usaco,
     "yosupo": parse_yosupo,
 }
