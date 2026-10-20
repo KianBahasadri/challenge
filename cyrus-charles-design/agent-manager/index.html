@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>i3 session switching — walkthrough</title>
+  <style>
+    :root { color-scheme: dark; font: 14px/1.6 monospace; color: #d8dee9; background: #101216; --accent: #f4ca76; }
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100vh; height: 100dvh; min-height: 640px; display: flex; flex-direction: column; }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    #screen { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+    .scene { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; isolation: isolate; }
+    .scene-snapshot { position: absolute; inset: 0 0 20px; z-index: 5; pointer-events: none; }
+    .desktop { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #000; }
+    .desktop[data-count="1"] { grid-template-columns: 1fr; }
+    .desktop[data-count="3"] { grid-template-rows: 1fr 1fr; }
+    .desktop[data-count="3"] .terminal:first-child { grid-row: span 2; }
+    .terminal { min-width: 0; min-height: 0; display: flex; flex-direction: column; border: 2px solid #222; background: #171a20; }
+    .terminal.focused { border-color: #285577; }
+    .titlebar { background: #222; color: #888; padding: 1px 5px; font: 11px/16px monospace; }
+    .terminal.focused .titlebar { background: #285577; color: #fff; outline: 1px solid #4c7899; }
+    .terminal pre { margin: 0; padding: 14px; white-space: pre-wrap; overflow-wrap: anywhere; overflow: hidden; }
+    .prompt { color: #a3be8c; }
+    .output { color: #b9c2d0; }
+    .cursor { display: inline-block; width: 1ch; height: 15px; line-height: 15px; background: #d8dee9; color: #171a20; vertical-align: middle; text-align: center; }
+    .terminal:not(.focused) .cursor { background: transparent; color: #727e8d; border: 1px solid #727e8d; }
+    .claude-ui { font-size: 12px; line-height: 1.45; color: #d8dee9; white-space: normal; }
+    .claude-box { position: relative; display: grid; grid-template-columns: minmax(150px, 42%) 1fr; max-width: 560px; margin-top: 8px; border: 1px dashed #d97757; border-radius: 5px; }
+    .claude-title { position: absolute; top: -9px; left: 18px; padding: 0 6px; background: #171a20; color: #7d8590; }
+    .claude-title span { color: #d97757; }
+    .claude-left { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 22px 12px 16px; text-align: center; }
+    .claude-welcome { margin-bottom: 14px; color: #e6edf3; }
+    .claude-mascot { width: 64px; height: 38px; margin-bottom: 14px; }
+    .claude-right { display: flex; flex-direction: column; border-left: 1px dashed #d97757; }
+    .claude-section { padding: 10px 14px; }
+    .claude-section + .claude-section { border-top: 1px dashed #d97757; }
+    .claude-heading { color: #d97757; margin-bottom: 2px; }
+    .claude-activity { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; }
+    .claude-muted { color: #7d8590; }
+    .claude-prompt-bar { max-width: 560px; margin-top: 18px; padding-top: 8px; border-top: 1px solid #343940; white-space: pre; }
+    .claude-task { max-width: 560px; margin-top: 14px; white-space: pre-wrap; }
+    .claude-status { color: #d97757; }
+
+    /* Default i3bar colors: https://i3wm.org/docs/userguide.html#_colors */
+    #bar { flex: 0 0 20px; min-width: 0; display: flex; align-items: center; background: #000; color: #fff; font: 11px/1 "DejaVu Sans Mono", monospace; }
+    #workspaces { flex: none; display: flex; align-items: center; gap: 1px; height: 100%; }
+    .workspace { height: 18px; display: flex; align-items: center; padding: 0 5px; border: 1px solid #333; background: #222; color: #888; }
+    .workspace.active { border-color: #4c7899; background: #285577; color: #fff; }
+    #statusline { min-width: 0; margin-left: auto; display: flex; justify-content: flex-end; align-items: center; overflow: hidden; padding-right: 3px; white-space: nowrap; }
+    .status-block { flex: none; }
+    .status-block + .status-block::before { content: ""; display: inline-block; height: 10px; border-left: 1px solid #666; margin: 0 9px; vertical-align: -1px; }
+    .good { color: #00ff00; }
+    .bad { color: #ff0000; }
+
+    .shade { position: absolute; inset: 0; background: #0007; z-index: 2; }
+    .picker { position: absolute; z-index: 3; top: 32px; left: 50%; transform: translateX(-50%); width: min(500px, calc(100% - 32px)); border: 2px solid #4c7899; background: #171a20; box-shadow: 0 15px 60px #0008; }
+    .picker-header { padding: 2px 10px; background: #285577; color: white; font-size: 12px; }
+    .search { margin: 10px; padding: 8px 10px; border: 1px solid #485361; background: #101216; color: #9ca8b8; }
+    .search.has-query { color: #fff; }
+    .results { padding: 0 10px 10px; }
+    .result { display: flex; justify-content: space-between; gap: 12px; padding: 7px 10px; border: 1px solid transparent; }
+    .result.selected { background: #285577; border-color: #4c7899; color: #fff; }
+    .result small { color: #acb8c8; white-space: nowrap; }
+    .picker-help { border-top: 1px solid #343940; padding: 5px 10px; font-size: 11px; color: #acb8c8; }
+    [hidden] { display: none !important; }
+
+    .arrows { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; overflow: visible; }
+    .highlight { fill: none; stroke: var(--accent); stroke-width: 2; }
+    .arrow { fill: none; stroke: var(--accent); stroke-width: 2; }
+    .callout { position: absolute; z-index: 5; width: min(310px, calc(100% - 32px)); padding: 16px 18px; background: #202833; border: 1px solid var(--accent); box-shadow: 0 8px 32px #0008; font-family: system-ui, sans-serif; }
+    .callout-meta { display: flex; align-items: center; justify-content: space-between; color: var(--accent); font: 11px/1.4 monospace; }
+    .action { padding: 1px 5px; border: 1px solid #6a5a3c; color: #f9dfae; }
+    .step-title { margin: 8px 0 6px; font-size: 18px; line-height: 1.3; font-weight: 600; color: #fff; }
+    .step-description { margin: 0; color: #c6ced8; font-size: 14px; line-height: 1.5; }
+    #navigation { position: absolute; z-index: 6; right: 16px; bottom: 36px; display: grid; grid-template-columns: auto auto auto; align-items: center; gap: 8px; padding: 10px; background: #202833; border: 1px solid #48586b; border-radius: 4px; box-shadow: 0 6px 24px #0006; }
+    #step-count { min-width: 7ch; margin-right: 4px; text-align: center; font: 12px/1 monospace; color: #a9b7c8; white-space: nowrap; }
+    #navigation button { min-width: 80px; padding: 8px 10px; border: 1px solid #48586b; background: transparent; border-radius: 3px; font: 14px/1.3 system-ui, sans-serif; }
+    #navigation button:disabled { opacity: .35; cursor: default; }
+    #navigation #next { background: var(--accent); border-color: var(--accent); color: #201a10; }
+    #navigation button:not(:disabled):hover { filter: brightness(1.15); }
+    #slide-slider { grid-column: 1 / -1; appearance: none; width: 100%; min-width: 0; height: 18px; margin: 0; background: transparent; cursor: pointer; --progress: 0%; }
+    #slide-slider::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--accent) var(--progress), #48586b var(--progress)); }
+    #slide-slider::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; border: 2px solid #202833; background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    #slide-slider::-moz-range-track { height: 4px; border-radius: 4px; background: #48586b; }
+    #slide-slider::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--accent); }
+    #slide-slider::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #202833; background: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    #slide-slider:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+    @media (max-width: 650px) {
+      :root { font-size: 11px; }
+      .terminal pre { padding: 8px; }
+      #statusline .optional { display: none; }
+      #statusline .battery::before { display: none; }
+      .result { padding: 7px; }
+      #navigation button { min-width: 70px; padding: 8px 10px; }
+      #step-count { margin-right: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="screen" aria-label="i3 desktop walkthrough">
+    <div id="scene" class="scene">
+    <div id="desktop" class="desktop" aria-label="Simulated terminals"></div>
+    <div id="shade" class="shade" hidden></div>
+    <section id="picker" class="picker" aria-label="Session picker preview" hidden>
+      <div class="picker-header">Switch session</div>
+      <div id="search" class="search"></div>
+      <div id="results" class="results"></div>
+      <div class="picker-help">↑ ↓ select · Enter switch · Esc cancel</div>
+    </section>
+    <svg id="arrows" class="arrows" aria-hidden="true">
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0 0 L8 4 L0 8 Z" fill="#f4ca76"/>
+        </marker>
+      </defs>
+      <rect id="highlight" class="highlight"/>
+      <path id="arrow" class="arrow" marker-end="url(#arrowhead)"/>
+    </svg>
+    <aside id="callout" class="callout" aria-live="polite" aria-atomic="true">
+      <div class="callout-meta"><span id="step-label"></span><span id="action" class="action"></span></div>
+      <h1 id="step-title" class="step-title"></h1>
+      <p id="step-description" class="step-description"></p>
+    </aside>
+    </div>
+    <div id="bar" aria-label="i3bar">
+      <div id="workspaces" aria-label="Workspaces"></div>
+      <!-- Illustrative i3status values, not live system information. -->
+      <div id="statusline" aria-label="Sample system status">
+        <span class="status-block optional">23.7 GiB</span>
+        <span class="status-block optional bad">W: down</span>
+        <span class="status-block optional good">E: 192.168.1.24 (1000 Mbit/s)</span>
+        <span class="status-block battery">BAT 87% 02:41:00</span>
+        <span class="status-block optional">0.21</span>
+        <span class="status-block optional">3.2 GiB</span>
+        <time class="status-block" datetime="2026-10-16T14:32:12">2026-10-16 14:32:12</time>
+      </div>
+    </div>
+    <nav id="navigation" aria-label="Slideshow controls">
+      <span id="step-count"></span>
+      <button id="back" aria-keyshortcuts="ArrowLeft">← Back</button>
+      <button id="next" aria-keyshortcuts="ArrowRight">Next →</button>
+      <input id="slide-slider" type="range" min="1" step="1" value="1" aria-label="Slide">
+    </nav>
+  </main>
+
+  <script>
+    // Each step shows the result of its action. Back and Replay rebuild the scene.
+    const steps = [
+      {
+        title: "Start with an empty desktop",
+        description: "",
+        workspace: 1, target: ".workspace.active", side: "left", highlight: true
+      },
+      {
+        title: "Open your first terminal",
+        description: "",
+        action: "Mod + Enter", workspace: 1, open: "web-editor", focused: "web-editor",
+        target: "#web-editor .titlebar", side: "right"
+      },
+      {
+        title: "Start a Claude session",
+        description: "",
+        action: "claude", workspace: 1, run: "web-editor", focused: "web-editor",
+        target: ".claude-box", side: "right"
+      },
+      {
+        title: "Give Claude a task",
+        description: "",
+        action: "Add a navigation bar to the homepage", workspace: 1, task: "web-editor", focused: "web-editor",
+        target: ".claude-task", side: "right"
+      },
+      {
+        title: "Open the dev-server terminal",
+        description: "",
+        action: "Mod + Enter", workspace: 1, open: "web-server", focused: "web-server",
+        target: "#web-server", side: "left"
+      },
+      {
+        title: "Run the website's dev server",
+        description: "",
+        action: "npm run dev", workspace: 1, run: "web-server", focused: "web-server",
+        target: "#web-server", side: "left"
+      },
+      {
+        title: "Open a Git shell",
+        description: "",
+        action: "Mod + V → Mod + Enter", workspace: 1, open: "web-shell", focused: "web-shell",
+        target: "#web-shell", side: "left"
+      },
+      {
+        title: "Check the project's changes",
+        description: "",
+        action: "git status --short", workspace: 1, run: "web-shell", focused: "web-shell",
+        target: "#web-shell", side: "left"
+      },
+      {
+        title: "Switch to workspace 2",
+        description: "",
+        action: "Mod + 2", workspace: 2, target: ".workspace.active", side: "left", highlight: true
+      },
+      {
+        title: "Open your second terminal",
+        description: "",
+        action: "Mod + Enter", workspace: 2, open: "api-editor", focused: "api-editor",
+        target: "#api-editor .titlebar", side: "right"
+      },
+      {
+        title: "Start your second Claude session",
+        description: "",
+        action: "claude", workspace: 2, run: "api-editor", focused: "api-editor",
+        target: "#api-editor .claude-box", side: "right"
+      },
+      {
+        title: "Give Claude a task",
+        description: "",
+        action: "Add a /search endpoint to routes.py", workspace: 2, task: "api-editor", focused: "api-editor",
+        target: "#api-editor .claude-task", side: "right"
+      },
+      {
+        title: "Open the test terminal",
+        description: "",
+        action: "Mod + Enter", workspace: 2, open: "api-tests", focused: "api-tests",
+        target: "#api-tests", side: "left"
+      },
+      {
+        title: "Run the API tests",
+        description: "",
+        action: "pytest -q", workspace: 2, run: "api-tests", focused: "api-tests",
+        target: "#api-tests", side: "left"
+      },
+      {
+        title: "Return to the website workspace",
+        description: "",
+        action: "Mod + 1", workspace: 1, focused: "web-shell", target: "#web-shell", side: "left"
+      },
+      {
+        title: "Open the session picker",
+        description: "The proposed picker lists all five sessions across both workspaces.",
+        action: "F2", workspace: 1, focused: "web-shell", picker: true,
+        query: "", selected: "web-shell", target: ".picker-header"
+      },
+      {
+        title: "Find the API project",
+        description: "Filter sessions by project name.",
+        action: "type: api", workspace: 1, focused: "web-shell", picker: true,
+        query: "api", selected: "api-editor", target: "#search"
+      },
+      {
+        title: "Select api / tests",
+        description: "",
+        action: "↓ then Enter", workspace: 1, focused: "web-shell", picker: true,
+        query: "api", selected: "api-tests", target: ".result.selected"
+      },
+      {
+        title: "Resume the test session",
+        description: "The picker jumps directly to the existing session on workspace 2.",
+        workspace: 2, focused: "api-tests", target: "#api-tests", side: "left"
+      }
+    ];
+
+    function renderClaudeSession(session) {
+      const container = element("div", "claude-ui");
+      container.innerHTML = `
+        <div class="claude-box">
+          <div class="claude-title"><span>Claude Code</span> v2.0.0</div>
+          <div class="claude-left">
+            <div class="claude-welcome">Welcome back Meaghan!</div>
+            <svg class="claude-mascot" viewBox="0 0 14 8" aria-hidden="true">
+              <path fill="#d97757" d="M2 0h10v2.2h1.5v1.5H12V5H11v1.8h-1V5H9v1.8H8V5H6v1.8H5V5H4v1.8H3V5H2V3.7H.5V2.2H2Z"/>
+              <rect x="3.5" y="1.2" width="1" height="1.6" fill="#171a20"/>
+              <rect x="9.5" y="1.2" width="1" height="1.6" fill="#171a20"/>
+            </svg>
+            <div class="claude-muted">Sonnet 4.5 • Max 20x<br>${session.cwd}</div>
+          </div>
+          <div class="claude-right">
+            <div class="claude-section">
+              <div class="claude-heading">Recent activity</div>
+              <div class="claude-activity">
+                <span>1m ago</span><span>Updated project memory</span>
+                <span>8m ago</span><span>Updated claw'd feet</span>
+                <span>2d ago</span><span>Add new words to spinner</span>
+                <span>1w ago</span><span>Update unit tests</span>
+              </div>
+              <div class="claude-muted">... /resume for more</div>
+            </div>
+            <div class="claude-section">
+              <div class="claude-heading">What's new</div>
+              <div>/agents to create subagents</div>
+              <div>/security-review for review agent</div>
+              <div>ctrl+b to background bashes</div>
+              <div class="claude-muted">... /help for more</div>
+            </div>
+          </div>
+        </div>
+        ${session.taskStarted ? `
+          <div class="claude-task">${session.taskHtml}</div>
+          <div class="claude-prompt-bar"><span class="claude-muted">&gt; </span></div>
+        ` : `
+          <div class="claude-prompt-bar"><span class="claude-muted">&gt; </span><span class="cursor" aria-hidden="true">T</span><span class="claude-muted">ry "edit &lt;filepath&gt; to ..."</span></div>
+        `}
+      `;
+      return container;
+    }
+
+    const sessions = [
+      {
+        id: "web-editor", workspace: 1, name: "website / claude", command: "cd ~/projects/website && claude",
+        cwd: "~/projects/website", render: renderClaudeSession,
+        taskHtml: `
+          <div><span class="claude-muted">&gt;</span> Add a navigation bar to the homepage</div>
+          <div style="margin-top: 8px">⏺ Read(src/app.tsx)<br><span class="claude-muted">  ⎿  Read 10 lines</span></div>
+          <div style="margin-top: 6px">⏺ Update(src/navigation.tsx)<br><span class="claude-muted">  ⎿  Added 14 lines</span></div>
+          <div class="claude-status" style="margin-top: 6px">✻ Updating src/app.tsx… (esc to interrupt)</div>
+        `
+      },
+      {
+        id: "web-server", workspace: 1, name: "website / dev server", command: "cd ~/projects/website && npm run dev",
+        output: `VITE ready in 182 ms
+
+  Local:  http://localhost:5173/
+
+14:32:08  [vite] page reload src/app.tsx
+14:32:11  [vite] hmr update /src/navigation.tsx`
+      },
+      {
+        id: "web-shell", workspace: 1, name: "website / git", command: "cd ~/projects/website && git status --short",
+        output: ` M src/app.tsx
+ M src/navigation.tsx
+
+~/projects/website (main)
+$ `, cursor: true
+      },
+      {
+        id: "api-editor", workspace: 2, name: "api / claude", command: "cd ~/projects/api && claude",
+        cwd: "~/projects/api", render: renderClaudeSession,
+        taskHtml: `
+          <div><span class="claude-muted">&gt;</span> Add a /search endpoint to routes.py</div>
+          <div style="margin-top: 8px">⏺ Read(routes.py)<br><span class="claude-muted">  ⎿  Read 12 lines</span></div>
+          <div style="margin-top: 6px">⏺ Update(routes.py)<br><span class="claude-muted">  ⎿  Added 8 lines</span></div>
+          <div class="claude-status" style="margin-top: 6px">✻ Updating test_routes.py… (esc to interrupt)</div>
+        `
+      },
+      {
+        id: "api-tests", workspace: 2, name: "api / tests", command: "cd ~/projects/api && pytest -q",
+        output: `....................                    [100%]
+
+20 passed in 0.84s
+
+~/projects/api (feat/search)
+$ `, cursor: true
+      }
+    ];
+
+    const screen = document.querySelector("#screen");
+    const scene = document.querySelector("#scene");
+    const desktop = document.querySelector("#desktop");
+    const picker = document.querySelector("#picker");
+    const callout = document.querySelector("#callout");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let current = -1;
+    let transition;
+
+    function finishTransition() {
+      if (!transition) return;
+      transition.animation.cancel();
+      transition.snapshot.remove();
+      transition = undefined;
+    }
+
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function showStep(index) {
+      if (index === current) return;
+      let snapshot;
+      if (current >= 0 && !reducedMotion.matches && !transition) {
+        // Fade the old scene once; rapid navigation updates the scene underneath immediately.
+        snapshot = scene.cloneNode(true);
+        snapshot.removeAttribute("id");
+        snapshot.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
+        snapshot.classList.add("scene-snapshot");
+        snapshot.setAttribute("aria-hidden", "true");
+        snapshot.inert = true;
+        screen.append(snapshot);
+      }
+      current = index;
+      const step = steps[current];
+      const opened = new Map();
+      for (const scene of steps.slice(0, current + 1)) {
+        if (scene.open) opened.set(scene.open, { ...sessions.find(session => session.id === scene.open), started: false });
+        if (scene.run) opened.get(scene.run).started = true;
+        if (scene.task) opened.get(scene.task).taskStarted = true;
+      }
+      const activeSessions = [...opened.values()];
+      const visible = activeSessions.filter(session => session.workspace === step.workspace);
+      desktop.dataset.count = visible.length;
+      desktop.replaceChildren();
+      visible.forEach(session => {
+        const terminal = element("article", "terminal" + (session.id === step.focused ? " focused" : ""));
+        terminal.id = session.id;
+        const name = session.started ? session.name : "terminal";
+        terminal.setAttribute("aria-label", name);
+        const title = element("header", "titlebar", name);
+        const content = element("pre");
+        if (session.started) {
+          content.append(element("span", "prompt", "$ " + session.command + "\n\n"));
+          content.append(session.render ? session.render(session) : element("span", "output", session.output));
+        } else {
+          content.append(element("span", "prompt", "dev@workstation:~$ "));
+        }
+        if (!session.started || session.cursor) {
+          const cursor = element("span", "cursor");
+          cursor.setAttribute("aria-hidden", "true");
+          content.append(cursor);
+        }
+        terminal.append(title, content);
+        desktop.append(terminal);
+      });
+
+      const workspaces = document.querySelector("#workspaces");
+      workspaces.replaceChildren();
+      const workspaceNumbers = [...new Set([step.workspace, ...activeSessions.map(session => session.workspace)])].sort();
+      workspaceNumbers.forEach(number => {
+        const label = element("span", "workspace" + (number === step.workspace ? " active" : ""), number);
+        label.setAttribute("aria-label", `Workspace ${number}${number === step.workspace ? ", active" : ""}`);
+        workspaces.append(label);
+      });
+
+      picker.hidden = !step.picker;
+      document.querySelector("#shade").hidden = !step.picker;
+      if (step.picker) {
+        const search = document.querySelector("#search");
+        search.textContent = step.query || "Find a project or terminal…";
+        search.classList.toggle("has-query", Boolean(step.query));
+        const results = document.querySelector("#results");
+        results.replaceChildren();
+        activeSessions.filter(session => session.name.includes(step.query)).forEach(session => {
+          const row = element("div", "result" + (session.id === step.selected ? " selected" : ""));
+          row.append(element("span", "", session.name));
+          row.append(element("small", "", session.id === step.focused ? "current" : `workspace ${session.workspace}`));
+          results.append(row);
+        });
+      }
+
+      document.querySelector("#step-label").textContent = `STEP ${String(current + 1).padStart(2, "0")}`;
+      document.querySelector("#step-title").textContent = step.title;
+      document.querySelector("#step-description").textContent = step.description;
+      document.querySelector("#step-description").hidden = !step.description;
+      document.querySelector("#action").textContent = step.action || "";
+      document.querySelector("#action").hidden = !step.action;
+      document.querySelector("#step-count").textContent = `${current + 1} / ${steps.length}`;
+      document.querySelector("#back").disabled = current === 0;
+      document.querySelector("#next").textContent = current === steps.length - 1 ? "Replay ↺" : "Next →";
+      const slider = document.querySelector("#slide-slider");
+      slider.max = steps.length;
+      slider.value = current + 1;
+      slider.setAttribute("aria-valuetext", `Slide ${current + 1} of ${steps.length}: ${step.title}`);
+      slider.style.setProperty("--progress", `${current / Math.max(1, steps.length - 1) * 100}%`);
+      positionAnnotation();
+      if (snapshot) {
+        const animation = snapshot.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: 160, easing: "ease-in-out", fill: "forwards"
+        });
+        transition = { snapshot, animation };
+        animation.onfinish = () => {
+          if (transition?.animation === animation) finishTransition();
+        };
+      }
+    }
+
+    function positionAnnotation() {
+      const step = steps[current];
+      const origin = screen.getBoundingClientRect();
+      const width = callout.offsetWidth;
+      const height = callout.offsetHeight;
+      const margin = 16;
+      const gap = 40;
+      const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+      function bounds(node) {
+        const box = node.getBoundingClientRect();
+        return { x: box.left - origin.left, y: box.top - origin.top, width: box.width, height: box.height };
+      }
+      const navigation = bounds(document.querySelector("#navigation"));
+      const bottom = bounds(document.querySelector("#bar")).y - margin;
+      picker.style.top = "";
+      const target = document.querySelector(step.target);
+      let rect = bounds(target);
+
+      function candidate(side, boundary = rect) {
+        const x = clamp(rect.x + rect.width / 2 - width / 2, margin, origin.width - width - margin);
+        const y = clamp(rect.y + rect.height / 2 - height / 2, margin, bottom - height);
+        if (side === "right") return { side, x: boundary.x + boundary.width + gap, y };
+        if (side === "left") return { side, x: boundary.x - width - gap, y };
+        if (side === "above") return { side, x, y: boundary.y - height - gap };
+        return { side, x, y: boundary.y + boundary.height + gap };
+      }
+      function fits(box) {
+        const clearOfControls = box.x + width + margin <= navigation.x ||
+          box.x >= navigation.x + navigation.width + margin ||
+          box.y + height + margin <= navigation.y;
+        return box.x >= margin && box.x + width <= origin.width - margin &&
+          box.y >= margin && box.y + height <= bottom && clearOfControls;
+      }
+
+      let placement;
+      if (step.picker) {
+        let box = bounds(picker);
+        placement = ["right", "left"].map(side => candidate(side, box)).find(fits);
+        if (!placement) {
+          if (rect.y - box.y < box.y + box.height - rect.y - rect.height) {
+            // On narrow screens, make space above the picker instead of drawing through its list.
+            picker.style.top = `${margin + height + gap}px`;
+            rect = bounds(target);
+            box = bounds(picker);
+            placement = candidate("above", box);
+          } else {
+            placement = candidate("below", box);
+          }
+        }
+      } else {
+        const sides = step.highlight ? ["above", "right", "left", "below"] :
+          [step.side || "right", "below", "above", "right", "left"];
+        placement = sides.map(side => candidate(side)).find(fits);
+        if (!placement && target.closest(".terminal")) {
+          // A terminal can fill the screen; its titlebar still has room for a nearby caption.
+          rect = bounds(target.closest(".terminal").querySelector(".titlebar"));
+          placement = ["below", "right", "left", "above"].map(side => candidate(side)).find(fits);
+        }
+        if (!placement && step.highlight) {
+          placement = candidate("above");
+          placement.y = Math.min(placement.y, navigation.y - height - margin);
+        }
+      }
+      const { x, y, side } = placement;
+      callout.style.left = `${x}px`;
+      callout.style.top = `${y}px`;
+
+      const highlight = document.querySelector("#highlight");
+      for (const [name, value] of Object.entries(rect)) highlight.setAttribute(name, value);
+      highlight.style.display = step.picker || step.highlight ? "" : "none";
+      let start, end;
+      // Connect the nearest facing edges, rather than the centers of large windows.
+      if (side === "above" || side === "below") {
+        const anchor = clamp(rect.x + rect.width / 2, x + 16, x + width - 16);
+        start = { x: anchor, y: side === "above" ? y + height + 3 : y - 3 };
+        end = {
+          x: clamp(anchor, rect.x + Math.min(4, rect.width / 2), rect.x + rect.width - Math.min(4, rect.width / 2)),
+          y: side === "above" ? rect.y - 6 : rect.y + rect.height + 6
+        };
+      } else {
+        const anchor = clamp(rect.y + rect.height / 2, y + 12, y + height - 12);
+        start = { x: side === "left" ? x + width + 3 : x - 3, y: anchor };
+        end = {
+          x: side === "left" ? rect.x - 6 : rect.x + rect.width + 6,
+          y: clamp(anchor, rect.y + Math.min(4, rect.height / 2), rect.y + rect.height - Math.min(4, rect.height / 2))
+        };
+      }
+      document.querySelector("#arrow").setAttribute("d", `M ${start.x} ${start.y} L ${end.x} ${end.y}`);
+    }
+
+    document.querySelector("#back").addEventListener("click", () => showStep(Math.max(0, current - 1)));
+    document.querySelector("#next").addEventListener("click", () => showStep((current + 1) % steps.length));
+    document.querySelector("#slide-slider").addEventListener("input", event => showStep(Number(event.target.value) - 1));
+    document.addEventListener("keydown", event => {
+      if (event.ctrlKey || event.altKey || event.metaKey) return;
+      if (event.target.matches('input[type="range"]')) return;
+      if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+        event.preventDefault();
+        showStep(event.key === "ArrowRight" ? Math.min(steps.length - 1, current + 1) : Math.max(0, current - 1));
+      }
+    });
+    window.addEventListener("resize", () => {
+      finishTransition();
+      positionAnnotation();
+    });
+    reducedMotion.addEventListener("change", event => {
+      if (event.matches) finishTransition();
+    });
+    showStep(0);
+  </script>
+</body>
+</html>

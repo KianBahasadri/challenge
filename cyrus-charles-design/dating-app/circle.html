@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circle — one week, from the people you already know</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500..700;1,9..144,500..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B0E14;
+      --ink: #F3F4F6;
+      --muted: #B7C0CE;
+      --faint: #8B95A8;
+      --line: rgba(255, 255, 255, 0.1);
+      --serif: "Fraunces", Georgia, serif;
+      --sans: "Plus Jakarta Sans", system-ui, sans-serif;
+      --phone-shadow: 0 0 0 12px #1F2433, 0 0 0 14px rgba(255,255,255,0.08), 0 32px 80px rgba(0, 0, 0, 0.8);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    img { display: block; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle 720px at 12% 10%, rgba(0, 129, 251, 0.08), transparent 70%),
+        radial-gradient(circle 640px at 90% 70%, rgba(123, 63, 228, 0.07), transparent 68%);
+      pointer-events: none;
+    }
+
+    .layout {
+      position: relative;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 42px 28px 72px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 460px;
+      gap: 56px;
+      align-items: start;
+    }
+
+    .explain { display: flex; flex-direction: column; gap: 28px; max-width: 640px; }
+
+    .kicker {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #93C5FD;
+    }
+
+    .lede { font-size: 1.12rem; color: #D5DCE6; max-width: 38rem; }
+
+    .seeing {
+      border: 1px solid var(--line);
+      background: rgba(20, 24, 36, 0.8);
+      border-radius: 18px;
+      padding: 16px 18px;
+    }
+
+    .seeing p { margin-top: 6px; color: #E5E7EB; }
+
+    section h2 {
+      font-family: var(--serif);
+      font-size: 1.45rem;
+      font-weight: 560;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    section p + p { margin-top: 10px; }
+    section p { color: #D1D5DB; font-size: 1.02rem; }
+
+    .phone-column {
+      position: sticky;
+      top: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .phone-shell {
+      position: relative;
+      width: 420px;
+      height: 850px;
+      background: #080A0F;
+      border-radius: 50px;
+      box-shadow: var(--phone-shadow);
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      user-select: none;
+    }
+
+    .phone-btn-power {
+      position: absolute; right: -15px; top: 180px;
+      width: 4px; height: 58px; background: #2D3345; border-radius: 0 4px 4px 0;
+    }
+    .phone-btn-vol-up, .phone-btn-vol-down {
+      position: absolute; left: -15px; width: 4px; height: 48px;
+      background: #2D3345; border-radius: 4px 0 0 4px;
+    }
+    .phone-btn-vol-up { top: 160px; }
+    .phone-btn-vol-down { top: 220px; }
+
+    .phone-screen {
+      height: 100%;
+      background: #0E121B;
+      border-radius: 40px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    .phone-island-bar {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      width: 116px; height: 28px; background: #000; border-radius: 20px; z-index: 40;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+    }
+    .island-camera {
+      width: 11px; height: 11px; border-radius: 50%; background: #111420; border: 1px solid #1E2335; position: relative;
+    }
+    .island-camera::after {
+      content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%;
+      background: #0051B3; top: 2px; left: 2px; opacity: 0.7;
+    }
+    .island-sensor { width: 7px; height: 7px; border-radius: 50%; background: #0F131F; }
+
+    .status {
+      height: 44px; padding: 0 22px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      font-size: 0.78rem; font-weight: 700; color: #fff;
+    }
+    .status span:last-child { font-weight: 600; color: #9CA3AF; font-size: 0.72rem; }
+
+    .app-head {
+      padding: 6px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .app-head-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .brand {
+      font-family: var(--serif); font-size: 1.25rem; font-weight: 600;
+    }
+    .quota {
+      font-size: 0.68rem; font-weight: 700; color: #FDBA74;
+      border: 1px solid rgba(253, 186, 116, 0.35); background: rgba(253, 186, 116, 0.08);
+      border-radius: 999px; padding: 3px 8px;
+    }
+    .steps { display: flex; gap: 6px; margin-top: 10px; }
+    .steps i { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.12); display: block; }
+    .steps i.on { background: #60A5FA; }
+    .steps i.done { background: #34D399; }
+
+    .view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+    .type-screen {
+      flex: 1; overflow: auto; padding: 0 0 16px; display: flex; flex-direction: column; gap: 18px;
+      scrollbar-width: none;
+    }
+    .type-screen::-webkit-scrollbar { display: none; }
+    .type-screen > .group { margin: 0 16px; }
+    .count-sticky {
+      position: sticky; top: 0; z-index: 2;
+      background: #0E121B;
+      padding: 8px 16px 14px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .count-sticky::after {
+      content: "";
+      position: absolute; left: 0; right: 0; top: 100%; height: 14px;
+      background: linear-gradient(#0E121B, rgba(14, 18, 27, 0));
+      pointer-events: none;
+    }
+    .count-block { display: flex; align-items: baseline; gap: 10px; }
+    .num {
+      font-family: var(--serif);
+      font-size: 3.6rem;
+      font-weight: 560;
+      letter-spacing: -0.04em;
+      line-height: 0.85;
+      font-variant-numeric: tabular-nums;
+    }
+    .num.pop { animation: pop 0.28s ease; }
+    @keyframes pop { from { opacity: 0.35; transform: translateY(6px); } }
+    .count-label { color: var(--muted); font-size: 0.92rem; line-height: 1.25; }
+    .pool { display: flex; flex-wrap: wrap; gap: 3px; min-height: 18px; }
+    .pip {
+      width: 5px; height: 5px; border-radius: 50%; background: #F4F1EA;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .pip.out { opacity: 0.16; transform: scale(0.72); }
+    .group { display: flex; flex-direction: column; gap: 8px; }
+    .group .label, .slider-head .label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint);
+    }
+    .slider-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .slider-head strong { font-size: 0.92rem; font-weight: 650; color: #F4F1EA; text-align: right; }
+    .slider-ends { display: flex; justify-content: space-between; font-size: 0.68rem; color: #6B7280; margin-top: -2px; }
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer;
+    }
+    input[type="range"]:focus-visible { outline: none; }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px; border-radius: 99px;
+      background: linear-gradient(to right, #F4F1EA var(--fill, 0%), #2A3142 var(--fill, 0%));
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 22px; height: 22px; margin-top: -9px; border: 0; border-radius: 50%;
+      background: #F4F1EA; box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+    }
+    input[type="range"]::-moz-range-track { height: 4px; border: 0; border-radius: 99px; background: #2A3142; }
+    input[type="range"]::-moz-range-progress { height: 4px; border-radius: 99px; background: #F4F1EA; }
+    input[type="range"]::-moz-range-thumb {
+      width: 22px; height: 22px; border: 0; border-radius: 50%; background: #F4F1EA;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      border: 1px solid var(--line); background: #171C27; border-radius: 999px;
+      padding: 8px 11px; font-size: 0.78rem; font-weight: 650; color: #E5E7EB;
+    }
+    .chip.on { background: #F4F1EA; color: #12141A; border-color: #F4F1EA; }
+    .see-bar { padding: 10px 16px 16px; border-top: 1px solid var(--line); }
+
+    .primary, .quiet {
+      border-radius: 999px; padding: 12px 14px; font-weight: 700; font-size: 0.92rem;
+    }
+    .primary { background: #F4F1EA; color: #12141A; border: 0; width: 100%; }
+    .primary:disabled { background: #2A3142; color: #8B95A8; cursor: default; }
+    .quiet {
+      background: transparent; border: 0; color: #9CA3AF; padding: 8px 0; text-decoration: underline;
+      text-underline-offset: 3px; width: auto;
+    }
+
+    .scroll {
+      flex: 1; overflow: auto; padding: 16px 16px 18px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .scroll h3 {
+      font-family: var(--serif); font-size: 1.35rem; font-weight: 560; letter-spacing: -0.02em; line-height: 1.2;
+    }
+    .sub { color: var(--muted); font-size: 0.88rem; }
+
+    .face {
+      display: flex; align-items: center; gap: 12px; text-align: left;
+      background: #161B26; border: 1px solid transparent; border-radius: 16px; padding: 8px;
+      width: 100%;
+    }
+    .face.on { border-color: #F4F1EA; }
+    .avatar {
+      width: 54px; height: 68px; border-radius: 10px; overflow: hidden; position: relative; flex: none;
+      background: #2A3142; display: grid; place-items: center;
+      font-family: var(--serif); font-size: 1.2rem;
+    }
+    .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .face strong { display: block; font-size: 0.98rem; }
+    .face span { color: var(--faint); font-size: 0.78rem; }
+    .mark {
+      margin-left: auto; width: 22px; height: 22px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.3); flex: none;
+    }
+    .face.on .mark { background: #F4F1EA; border-color: #F4F1EA; }
+
+    .result-card {
+      display: flex; gap: 12px; align-items: center;
+      background: #161B26; border-radius: 16px; padding: 10px;
+    }
+    .result-card .avatar { width: 52px; height: 64px; }
+    .yes { color: #6EE7B7; font-size: 0.8rem; font-weight: 700; }
+    .no { color: #FCA5A5; font-size: 0.8rem; font-weight: 700; }
+    .cap {
+      margin-top: 6px; padding: 12px; border-radius: 14px;
+      background: rgba(244, 241, 234, 0.06); color: #E5E7EB; font-size: 0.92rem;
+    }
+
+    button:focus-visible { outline: 2px solid #93C5FD; outline-offset: 2px; }
+
+    @media (max-width: 1040px) {
+      .layout { grid-template-columns: 1fr; }
+      .phone-column { position: relative; top: 0; }
+    }
+    @media (max-width: 480px) {
+      .layout { padding: 20px 12px 48px; }
+      .phone-shell { width: 100%; height: 780px; border-radius: 36px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .num.pop, .pip { animation: none; transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <article class="explain">
+      <header>
+        <p class="lede">The phone on the right is the whole loop. You describe the person you want. The app tells you exactly how many people in your circle fit, and that number moves as you change your mind.</p>
+      </header>
+
+      <div class="seeing">
+        <p class="kicker">What you’re seeing</p>
+        <p id="seeing">Everyone in your circle fits, because you haven’t narrowed anything. Move a slider or turn on a requirement and the count will drop.</p>
+      </div>
+
+      <section>
+        <h2>The list is already made</h2>
+        <p>This only works if Meta is the one making it, because Meta already has the graph. Instagram, your contacts, the rest of the account. On the backend, that data becomes a list of eligible people in your circle. You don’t go looking for strangers, and nobody fills out a dating profile to get on the list.</p>
+      </section>
+
+      <section>
+        <h2>You describe a type</h2>
+        <p>Height and income are sliders: drag the minimum and the pool moves with your finger. Everything else is a requirement you can turn on. School, work, how they stay active, what they’re into, how they live. Those facts are already tied together. Medicine and law come with the degree. Taller people are the ones in certain sports. The job is what the income follows. Each requirement you turn on has to be true. Turn it off and it isn’t.</p>
+      </section>
+
+      <section>
+        <h2>The number is the pool</h2>
+        <p>You don’t browse the list to find out if your type is realistic. The phone tells you the exact count of people in your circle who pass. Add a requirement and the pool shrinks. Take one off and it grows. Each dot is one person: bright if they still fit, dim if they dropped out.</p>
+      </section>
+
+      <section>
+        <h2>Then the week is over</h2>
+        <p>When the count feels right, you look at who is left and ask two of them. If one says yes, you have one date. If both say yes, you have two. Two is the cap for the week. You don’t get a substitute, and you don’t keep scrolling.</p>
+      </section>
+    </article>
+
+    <aside class="phone-column" aria-label="Circle, on a phone">
+      <div class="phone-shell">
+        <div class="phone-btn-power"></div>
+        <div class="phone-btn-vol-up"></div>
+        <div class="phone-btn-vol-down"></div>
+        <div class="phone-screen">
+          <div class="phone-island-bar" aria-hidden="true">
+            <div class="island-camera"></div>
+            <div class="island-sensor"></div>
+          </div>
+          <div class="status">
+            <span>9:41</span>
+            <span>Circle</span>
+          </div>
+          <header class="app-head">
+            <div class="app-head-row">
+              <div class="brand">Circle</div>
+              <div class="quota" id="quota">No date yet</div>
+            </div>
+            <div class="steps" id="steps" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+          </header>
+          <div class="view" id="view"></div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+      <script>
+    const HEIGHT_MIN = 59;
+    const HEIGHT_MAX = 78;
+    const INCOME_MIN = 40000;
+    const INCOME_MAX = 300000;
+
+    const groups = [
+      { title: "School", chips: [
+        ["college", "Finished college"],
+        ["grad", "Has a graduate degree"],
+        ["phd", "Has a PhD"],
+      ]},
+      { title: "Work", chips: [
+        ["medicine", "Works in medicine"],
+        ["law", "Works in law"],
+        ["tech", "Works in tech"],
+        ["teach", "Teaches"],
+        ["business", "Has a business"],
+        ["arts", "Works in the arts"],
+        ["remote", "Works remote"],
+      ]},
+      { title: "Active", chips: [
+        ["workout", "Works out"],
+        ["runs", "Runs"],
+        ["basketball", "Plays basketball"],
+        ["sport", "Plays a sport"],
+        ["outdoors", "Outdoors"],
+      ]},
+      { title: "What they’re into", chips: [
+        ["cooks", "Cooks"],
+        ["reads", "Reads"],
+        ["travels", "Travels"],
+        ["shows", "Goes to shows"],
+        ["art", "Makes art"],
+        ["instrument", "Plays an instrument"],
+        ["film", "Into film"],
+      ]},
+      { title: "At home", chips: [
+        ["dog", "Has a dog"],
+        ["cat", "Has a cat"],
+        ["alone", "Lives alone"],
+        ["kids", "Has kids"],
+        ["wantkids", "Wants kids"],
+        ["early", "Early riser"],
+        ["night", "Night owl"],
+        ["nosmoke", "Doesn’t smoke"],
+        ["nodrink", "Doesn’t drink"],
+        ["veg", "Vegetarian"],
+        ["language", "Speaks another language"],
+      ]},
+    ];
+    const tagLabel = Object.fromEntries(groups.flatMap((g) => g.chips));
+
+    const firsts = ["Adele","Ruth","Naomi","Iris","Hannah","Marco","Jonah","Felix","Theo","Andre","Priya","Malik","Owen","Grace","Sofia","Chris","Lina","Ben","Jules","Nora","Elena","Paul","Mei","Omar","Claire","Hugo","Amina","Leo","Nina","Isaac","Rosa","Evan","Jade","Karl","Wes","Tara","Idris","Bea","Nico","Yara","Cole","Anya","Reid","Sasha","Quinn","Mara","Devon","Lucia","Maya","Amir","Leila","Noah","Chloe","Ezra","Hana","Victor","Ingrid","Rafael","Daphne","Miles","Aisha","Oscar","Freya","Julian","Petra","Hassan","Cora","Simon","Elsa","Tomas","Nia","Caleb","Vera","Adrian","Laila","Grant","Willa","Yusuf","Esme","Martin","Zara","Philip","Noor","Camille","David","Rowan","Farah","Emilio","Greta","Kwame","Helen","Pavel","June","Arun","Selma","Dennis","Amara","Lars","Fatima","Hugh","Bianca","Soren","Nadia","Elliot","Kenji","Pia","Samir","Lois","Imani","Seth","Aya","Bruno","Celeste","Diego","Eden","Farid","Gina","Hiro","Inez","Jakob","Kira","Luca","Mina","Nabil","Olga","Paolo","Rae","Sami","Talia","Uma","Vivek","Wren","Ximena","Yasmin","Zeke","Alec","Brigid","Casper","Delia","Enzo","Fiona","Gael","Hattie","Ivo","Juno","Kofi","Lila","Mateo","Nell","Orla","Pax","Rhea","Silas","Thea","Veda","Wynn","Zola","Abel","Bette","Cosima","Dara","Eitan","Faye","Gio","Ida","Jaleel","Kelsey","Lev","Maude","Nils","Oona","Pilar","Remy","Shira","Tal","Una","Yves","Zain","Anika","Bodhi","Cleo","Dax","Elio","Frida","Gus","Hedy","Ivy","Kit","Luna","Moss","Niko","Opal","Penn","Roma","Sol","Yael","Zion","Bex","Cruz","Dove","Emil","Gita","Hal","Ines","Joss","Keiko","Lex","Maren","Ori","Peri","Rafi","Sable","Tove","Uri","Vivi","Yuki","Zuri","Ada","Blaise","Dina","Fern","Gil","Indigo","Jem","Koa","Lux","Miri","Neo","Obi","Rue","Sky","Taj","Ula","Wim","Yosef","Zia"];
+    const lasts = ["Okonkwo","Abebe","Berg","Nguyen","Cho","Velez","Ellis","Moreau","Marin","Costa","Shah","Jordan","Blake","Ibarra","Rahman","Dalton","Farouk","Adler","Park","Singh","Brooks","Kim","Haddad","Ibrahim","Walsh","Duarte","Okeke","Bernard","Sato","Nwosu","Keller","Murphy","Diaz","Hoffman","Lind","Bennett","Rossi","Ahmed","Novak","Clarke","Petrova","Lang","Morales","Stein","Abbas","Okoro","Navarro","Cho"];
+    const photos = ["1494790108377-be9c29b29330","1531123897727-8f129e1688ce","1544005313-94ddf0286df2","1524504388940-b1c1722653e1","1487412720507-e7ab37603c6f","1500648767791-00dcc994a43e","1506794778202-cad84cf45f1d","1507003211169-0a1dd7228f2d","1539571696357-5a69c17a67c6","1501196354995-cbb51c65aaea","1517841905240-472988babdf9","1519345182560-3f2917c472ef","1547425260-76bcadfb4f2c","1438761681033-6461ffad8d80","1521119989659-a83eee488004","1463453091185-61582044d556","1552374196-c4e7ffc6e126","1552058544-f2b08422138a"];
+
+    function mulberry32(seed) {
+      let a = seed;
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const poolSize = 200 + Math.floor(Math.random() * 31);
+    const rnd = mulberry32((Math.random() * 4294967296) >>> 0);
+
+    function chance(p) { return rnd() < p; }
+    function money(loK, hiK, skew) {
+      const t = Math.pow(rnd(), skew);
+      const x = loK + t * (hiK - loK);
+      return Math.max(40, Math.min(300, Math.round(x / 5) * 5)) * 1000;
+    }
+    function add(tags, id) {
+      if (!tags.includes(id)) tags.push(id);
+    }
+
+    const people = Array.from({ length: poolSize }, (_, i) => {
+      const tags = [];
+      const height = Math.max(60, Math.min(77, Math.round(66 + (rnd() + rnd() + rnd() - 1.5) * 8)));
+
+      const roll = rnd();
+      const job = roll < 0.09 ? "medicine"
+        : roll < 0.15 ? "law"
+        : roll < 0.34 ? "tech"
+        : roll < 0.45 ? "teach"
+        : roll < 0.56 ? "business"
+        : roll < 0.65 ? "arts"
+        : "other";
+
+      let tier = 0;
+      let phd = false;
+      if (job === "medicine") {
+        tier = rnd() < 0.42 ? 3 : 2;
+        phd = tier === 3 && chance(0.18);
+      } else if (job === "law") {
+        tier = rnd() < 0.72 ? 3 : 2;
+        phd = chance(0.04);
+      } else if (job === "tech") {
+        const r = rnd();
+        tier = r < 0.07 ? 3 : r < 0.34 ? 2 : r < 0.93 ? 1 : 0;
+        phd = tier === 3;
+      } else if (job === "teach") {
+        const r = rnd();
+        tier = r < 0.08 ? 3 : r < 0.64 ? 2 : 1;
+        phd = tier === 3;
+      } else if (job === "business") {
+        const r = rnd();
+        tier = r < 0.03 ? 3 : r < 0.26 ? 2 : r < 0.74 ? 1 : 0;
+        phd = tier === 3 && chance(0.4);
+        if (tier === 3 && !phd) tier = 2;
+      } else if (job === "arts") {
+        const r = rnd();
+        tier = r < 0.02 ? 3 : r < 0.2 ? 2 : r < 0.68 ? 1 : 0;
+        phd = tier === 3;
+      } else {
+        const r = rnd();
+        tier = r < 0.02 ? 3 : r < 0.14 ? 2 : r < 0.52 ? 1 : 0;
+        phd = tier === 3;
+      }
+      if (phd) tier = Math.max(tier, 3);
+      if (tier >= 1) add(tags, "college");
+      if (tier >= 2) add(tags, "grad");
+      if (phd) add(tags, "phd");
+      if (job !== "other") add(tags, job);
+
+      let income;
+      if (job === "medicine") income = tier >= 3 ? money(165, 300, 0.85) : money(88, 155, 1);
+      else if (job === "law") income = tier >= 3 ? money(130, 270, 0.9) : money(80, 150, 1);
+      else if (job === "tech") income = money(tier >= 2 ? 130 : 95, tier >= 3 ? 280 : 230, 0.85);
+      else if (job === "teach") income = phd ? money(70, 140, 1) : money(48, tier >= 2 ? 95 : 78, 1.15);
+      else if (job === "business") income = money(tier >= 1 ? 80 : 50, 300, 1.35);
+      else if (job === "arts") income = money(40, tier >= 2 ? 120 : 90, 1.1);
+      else income = money(40, tier >= 2 ? 125 : 100, 1.05);
+
+      const remoteP = { medicine: 0.05, law: 0.16, tech: 0.74, teach: 0.1, business: 0.42, arts: 0.48, other: 0.2 };
+      if (chance(remoteP[job])) add(tags, "remote");
+
+      let ballP = 0.02;
+      if (height >= 76) ballP = 0.7;
+      else if (height >= 74) ballP = 0.45;
+      else if (height >= 72) ballP = 0.2;
+      else if (height >= 70) ballP = 0.08;
+      if (chance(ballP)) {
+        add(tags, "basketball");
+        add(tags, "sport");
+        add(tags, "workout");
+      } else if (chance(Math.min(0.5, 0.08 + Math.max(0, height - 66) * 0.04))) {
+        add(tags, "sport");
+        if (chance(0.75)) add(tags, "workout");
+      }
+      if (!tags.includes("workout") && chance(0.34)) add(tags, "workout");
+      if (chance(tags.includes("workout") ? 0.42 : 0.07)) add(tags, "runs");
+      if (chance(tags.includes("runs") ? 0.64 : 0.18)) add(tags, "outdoors");
+
+      const bookish = chance(job === "teach" || phd ? 0.74 : 0.36);
+      if (chance(bookish ? 0.88 : 0.16)) add(tags, "reads");
+      if (chance(bookish ? 0.5 : 0.12)) add(tags, "film");
+      const social = chance(0.44);
+      if (chance(social ? 0.58 : 0.14)) add(tags, "shows");
+      if (chance(social ? 0.62 : 0.2)) add(tags, "travels");
+      if (chance((social ? 0.52 : 0.26) + (tags.includes("outdoors") ? 0.08 : 0))) add(tags, "cooks");
+      const maker = chance(job === "arts" ? 0.88 : 0.2);
+      if (chance(maker ? 0.84 : 0.07)) add(tags, "art");
+      if (chance(maker ? 0.48 : bookish ? 0.18 : 0.05)) add(tags, "instrument");
+
+      if (chance(income >= 90000 ? 0.32 : 0.18)) add(tags, "kids");
+      if (chance(tags.includes("kids") ? 0.58 : 0.4)) add(tags, "wantkids");
+      if (chance(tags.includes("kids") ? 0.04 : 0.44)) add(tags, "alone");
+      if (chance(tags.includes("alone") ? 0.18 : 0.36)) add(tags, "dog");
+      if (chance(tags.includes("dog") ? 0.07 : 0.28)) add(tags, "cat");
+
+      let earlyP = 0.3;
+      let nightP = 0.3;
+      if (job === "medicine" || job === "teach") { earlyP = 0.58; nightP = 0.12; }
+      if (tags.includes("shows")) { nightP += 0.16; earlyP = Math.max(0.08, earlyP - 0.12); }
+      const schedule = rnd();
+      if (schedule < earlyP) add(tags, "early");
+      else if (schedule < earlyP + nightP) add(tags, "night");
+
+      let smokeFree = 0.66;
+      if (job === "medicine") smokeFree = 0.94;
+      if (tags.includes("workout")) smokeFree = Math.max(smokeFree, 0.86);
+      if (phd) smokeFree = Math.max(smokeFree, 0.9);
+      if (chance(smokeFree)) add(tags, "nosmoke");
+      if (chance((tags.includes("nosmoke") ? 0.3 : 0.08) + (tags.includes("early") ? 0.12 : 0))) add(tags, "nodrink");
+      if (chance(0.08 + (tags.includes("outdoors") ? 0.09 : 0) + (tags.includes("cooks") ? 0.07 : 0))) add(tags, "veg");
+      if (chance(0.14 + (tags.includes("travels") ? 0.3 : 0) + (tier >= 2 ? 0.1 : 0))) add(tags, "language");
+
+      return {
+        name: firsts[i] + " " + lasts[i % lasts.length],
+        yes: chance(0.55),
+        photo: photos[i % photos.length],
+        height,
+        income,
+        tags,
+      };
+    });
+
+    const view = document.getElementById("view");
+    const seeing = document.getElementById("seeing");
+    const quota = document.getElementById("quota");
+    const steps = document.getElementById("steps");
+
+    let minHeight = HEIGHT_MIN;
+    let minIncome = INCOME_MIN;
+    const wants = new Set();
+    let asked = [];
+    let shown = [];
+    let phase = "type";
+    let dates = 0;
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function firstName(name) { return name.split(" ")[0]; }
+    function photoUrl(id) {
+      return "https://images.unsplash.com/photo-" + id + "?auto=format&fit=crop&w=240&h=320&q=70";
+    }
+    function heightLabel(inches) {
+      if (inches <= HEIGHT_MIN) return "No minimum";
+      return Math.floor(inches / 12) + "′" + (inches % 12) + "″ and up";
+    }
+    function incomeLabel(n) {
+      if (n <= INCOME_MIN) return "No minimum";
+      return "$" + Math.round(n / 1000) + "k and up";
+    }
+    function fillPct(el) {
+      return ((el.value - el.min) / (el.max - el.min) * 100) + "%";
+    }
+    function matches() {
+      return people.filter((p) =>
+        p.height >= minHeight &&
+        p.income >= minIncome &&
+        [...wants].every((tag) => p.tags.includes(tag))
+      );
+    }
+    function avatar(p) {
+      return `<div class="avatar" aria-hidden="true"><span>${esc(firstName(p.name)[0])}</span><img src="${esc(photoUrl(p.photo))}" alt=""></div>`;
+    }
+    function bindImages() {
+      view.querySelectorAll("img").forEach((img) => img.addEventListener("error", () => img.remove()));
+    }
+
+    function paintChrome() {
+      const pills = steps.querySelectorAll("i");
+      const order = ["type", "people", "week"];
+      const at = order.indexOf(phase);
+      pills.forEach((pill, i) => { pill.className = i < at ? "done" : i === at ? "on" : ""; });
+      quota.textContent = dates === 0 ? "No date yet" : dates === 1 ? "1 date this week" : "2 dates this week";
+    }
+
+    function seeingText(n) {
+      const total = people.length;
+      if (phase === "people") return "These are the people who fit what you set. Pick two to ask. A week still holds at most two dates.";
+      if (phase === "week") return "You asked two people from the pool you narrowed. One yes is one date. Two yeses are two. Then the week stops.";
+      if (n === total) return "All " + total + " people in your circle fit, because you haven’t narrowed anything. Move a slider or turn on a requirement and the count will drop.";
+      if (n === 0) return "Nobody in your circle fits this. Ease a slider back, or turn a requirement off, and the pool grows.";
+      const noun = n === 1 ? "person" : "people";
+      return n + " " + noun + " in your circle fit. Move a slider or a requirement and that number shrinks or grows.";
+    }
+
+    function paintPool() {
+      const list = matches();
+      const ids = new Set(list.map((p) => p.name));
+      document.querySelectorAll(".pip").forEach((pip) => pip.classList.toggle("out", !ids.has(pip.dataset.name)));
+      const num = document.getElementById("num");
+      const label = document.getElementById("countLabel");
+      if (num && num.textContent !== String(list.length)) {
+        num.textContent = String(list.length);
+        num.classList.remove("pop");
+        void num.offsetWidth;
+        num.classList.add("pop");
+      }
+      if (label) label.textContent = list.length === 1 ? "person in your circle fits" : "people in your circle fit";
+      const btn = document.getElementById("see");
+      if (btn) {
+        btn.disabled = list.length === 0;
+        btn.textContent = list.length === 0 ? "Nobody fits" : "See these " + list.length;
+      }
+      seeing.textContent = seeingText(list.length);
+    }
+
+    function render() {
+      paintChrome();
+      if (phase === "type") renderType();
+      else if (phase === "people") renderPeople();
+      else renderWeek();
+      bindImages();
+    }
+
+    function sliderBlock(id, label, min, max, step, value, read, lo, hi) {
+      const pct = ((value - min) / (max - min) * 100) + "%";
+      return `
+        <div class="group">
+          <div class="slider-head">
+            <span class="label">${label}</span>
+            <strong id="${id}Read">${esc(read)}</strong>
+          </div>
+          <input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}" style="--fill:${pct}" aria-label="${label}">
+          <div class="slider-ends"><span>${lo}</span><span>${hi}</span></div>
+        </div>`;
+    }
+
+    function renderType() {
+      const list = matches();
+      const n = list.length;
+      const ids = new Set(list.map((p) => p.name));
+      view.innerHTML = `
+        <div class="type-screen">
+          <div class="count-sticky">
+            <div class="count-block">
+              <div class="num" id="num" aria-live="polite">${n}</div>
+              <div class="count-label" id="countLabel">${n === 1 ? "person in your circle fits" : "people in your circle fit"}</div>
+            </div>
+            <div class="pool" aria-hidden="true">
+              ${people.map((p) => `<span class="pip${ids.has(p.name) ? "" : " out"}" data-name="${esc(p.name)}"></span>`).join("")}
+            </div>
+          </div>
+          ${sliderBlock("heightRange", "Minimum height", HEIGHT_MIN, HEIGHT_MAX, 1, minHeight, heightLabel(minHeight), "4′11″", "6′6″")}
+          ${sliderBlock("incomeRange", "Minimum income", INCOME_MIN, INCOME_MAX, 5000, minIncome, incomeLabel(minIncome), "$40k", "$300k")}
+          ${groups.map((g) => `
+            <div class="group">
+              <div class="label">${esc(g.title)}</div>
+              <div class="chips">
+                ${g.chips.map(([id, text]) => `<button type="button" class="chip${wants.has(id) ? " on" : ""}" data-tag="${id}">${esc(text)}</button>`).join("")}
+              </div>
+            </div>`).join("")}
+        </div>
+        <div class="see-bar">
+          <button type="button" class="primary" id="see" ${n === 0 ? "disabled" : ""}>${n === 0 ? "Nobody fits" : "See these " + n}</button>
+        </div>`;
+      const height = document.getElementById("heightRange");
+      const income = document.getElementById("incomeRange");
+      const onSlide = () => {
+        minHeight = Number(height.value);
+        minIncome = Number(income.value);
+        document.getElementById("heightRangeRead").textContent = heightLabel(minHeight);
+        document.getElementById("incomeRangeRead").textContent = incomeLabel(minIncome);
+        height.style.setProperty("--fill", fillPct(height));
+        income.style.setProperty("--fill", fillPct(income));
+        paintPool();
+      };
+      height.addEventListener("input", onSlide);
+      income.addEventListener("input", onSlide);
+      seeing.textContent = seeingText(n);
+    }
+
+    function renderPeople() {
+      shown = matches();
+      view.innerHTML = `
+        <div class="scroll">
+          <h3>${shown.length} ${shown.length === 1 ? "person" : "people"}.</h3>
+          <p class="sub">This is who still fits. Ask two of them.</p>
+          ${shown.map((p) => {
+            const matched = p.tags.filter((t) => wants.has(t)).map((t) => tagLabel[t]);
+            const line = matched.join(" · ");
+            return `
+            <button type="button" class="face${asked.includes(p) ? " on" : ""}" data-id="${esc(p.name)}">
+              ${avatar(p)}
+              <div>
+                <strong>${esc(firstName(p.name))}</strong>
+                ${line ? `<span>${esc(line)}</span>` : ""}
+              </div>
+              <div class="mark"></div>
+            </button>`;
+          }).join("")}
+          <button type="button" class="primary" id="ask" ${asked.length === 2 ? "" : "disabled"}>${asked.length === 2 ? "Ask these two" : "Choose 2"}</button>
+          <button type="button" class="quiet" id="back">Change your type</button>
+        </div>`;
+      seeing.textContent = seeingText(shown.length);
+    }
+
+    function renderWeek() {
+      const yes = asked.filter((p) => p.yes);
+      dates = yes.length;
+      const line = dates === 2
+        ? "Both said yes. Two dates this week. That is the cap."
+        : dates === 1
+          ? "One said yes. One date this week. You don’t get someone else to replace the no."
+          : "Neither said yes. No date this week. You don’t get two more asks.";
+      view.innerHTML = `
+        <div class="scroll">
+          <h3>${dates === 0 ? "No date this week." : dates === 1 ? "One date." : "Two dates."}</h3>
+          ${asked.map((p) => `
+            <div class="result-card">
+              ${avatar(p)}
+              <div>
+                <strong>${esc(firstName(p.name))}</strong>
+                <div class="${p.yes ? "yes" : "no"}">${p.yes ? "Said yes" : "Didn’t"}</div>
+              </div>
+            </div>`).join("")}
+          <p class="cap">${line}</p>
+          <button type="button" class="primary" id="next">Next week</button>
+        </div>`;
+      paintChrome();
+      seeing.textContent = seeingText(0);
+    }
+
+    view.addEventListener("click", (e) => {
+      const tagBtn = e.target.closest("[data-tag]");
+      if (tagBtn && phase === "type") {
+        const tag = tagBtn.dataset.tag;
+        if (wants.has(tag)) wants.delete(tag);
+        else wants.add(tag);
+        tagBtn.classList.toggle("on", wants.has(tag));
+        paintPool();
+        return;
+      }
+      if (e.target.closest("#see")) {
+        asked = [];
+        phase = "people";
+        render();
+        return;
+      }
+      const face = e.target.closest(".face");
+      if (face && phase === "people") {
+        const person = shown.find((p) => p.name === face.dataset.id);
+        const i = asked.indexOf(person);
+        if (i >= 0) asked.splice(i, 1);
+        else if (asked.length < 2) asked.push(person);
+        renderPeople();
+        bindImages();
+        return;
+      }
+      if (e.target.closest("#back")) {
+        asked = [];
+        phase = "type";
+        render();
+        return;
+      }
+      if (e.target.closest("#ask")) {
+        phase = "week";
+        render();
+        return;
+      }
+      if (e.target.closest("#next")) {
+        asked = [];
+        shown = [];
+        dates = 0;
+        phase = "type";
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
