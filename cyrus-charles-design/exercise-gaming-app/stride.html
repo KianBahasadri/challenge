@@ -1,0 +1,1976 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b0d">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Aether Stride — Exercise Gaming App dual-device interactive preview with synchronized step progress dial and adaptive cross-device interface.">
+  <title>Aether Stride — Exercise Gaming Platform</title>
+
+  <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono (Design Guide Foundations) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* Design Guide Foundations: Dark Theme Shared Tokens */
+      --canvas: #080b0d;
+      --surface: #11171b;
+      --surface-raised: #151d21;
+      --ink: #dbe3e6;
+      --ink-strong: #f3f6f5;
+      --muted: #849094;
+      --faint: #566166;
+      --line: #263137;
+      --line-strong: #3a4a51;
+      --action-primary: #26343a;
+      --action-primary-hover: #314249;
+      --control-selected: #66777e;
+      --control-selected-hover: #74868d;
+      --focus: #9cc8ff;
+      --accent: #62c8d8;
+      --accent-soft: rgba(98, 200, 216, 0.12);
+      --good: #79c99e;
+      --good-soft: rgba(121, 201, 158, 0.14);
+      --caution: #d6ad63;
+      --caution-soft: rgba(214, 173, 99, 0.14);
+      --danger: #df7e78;
+      --danger-soft: rgba(223, 126, 120, 0.14);
+      --derived: #b9aaef;
+      --derived-soft: rgba(185, 170, 239, 0.14);
+
+      /* Typography */
+      --ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "IBM Plex Mono", Consolas, monospace;
+
+      /* Geometry & Spacing */
+      --radius: 6px;
+      --radius-sm: 4px;
+      --radius-pill: 9999px;
+
+      /* Elevation */
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.42);
+      --shadow-device: 0 24px 70px -15px rgba(0, 0, 0, 0.65);
+
+      font-family: var(--ui);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Keyboard focus requirement from Foundations */
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex="0"]:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page {
+      width: min(100%, 1720px);
+      min-height: 100svh;
+      margin: 0 auto;
+      padding: 36px 44px;
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      gap: 52px;
+      align-items: center;
+    }
+
+    /* =========================================================
+       Left Narrative & Editorial Column
+       ========================================================= */
+    .sidebar-narrative {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      padding-top: 4px;
+      z-index: 10;
+    }
+
+    .brand-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-eyebrow .pulsing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse-dot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 0.5; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .narrative-header h1 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ink-strong);
+      letter-spacing: -0.02em;
+    }
+
+    .narrative-header .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+
+    .narrative-body {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      color: var(--ink);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 2px 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .feature-item .icon {
+      flex-shrink: 0;
+      width: 17px;
+      height: 17px;
+      margin-top: 2px;
+      color: var(--accent);
+    }
+
+    .feature-item-text strong {
+      display: block;
+      color: var(--ink-strong);
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    .feature-item-text span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Device Switcher Control Card */
+    .control-card {
+      padding: 14px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-card-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .swap-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .swap-hint svg {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+
+    .switcher-pill-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 3px;
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      border: 1px solid var(--line);
+    }
+
+    .switcher-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--ui);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 120ms ease, color 120ms ease;
+    }
+
+    .switcher-btn:hover {
+      color: var(--ink-strong);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .switcher-btn.active {
+      background: var(--action-primary);
+      color: var(--ink-strong);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .switcher-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* Live Step Simulator Widget */
+    .simulator-box {
+      margin-top: 2px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .simulator-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .simulator-label {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .simulator-value {
+      font-family: var(--mono);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .simulator-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: var(--radius-pill);
+      background: var(--line-strong);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .simulator-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--surface-raised);
+      box-shadow: 0 0 6px rgba(98, 200, 216, 0.4);
+      cursor: pointer;
+      transition: transform 100ms ease;
+    }
+
+    .simulator-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .simulator-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--surface-raised);
+      box-shadow: 0 0 6px rgba(98, 200, 216, 0.4);
+      cursor: pointer;
+    }
+
+    .preset-chips {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .preset-chip {
+      padding: 3px 7px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10.5px;
+      cursor: pointer;
+      transition: all 120ms ease;
+    }
+
+    .preset-chip:hover {
+      color: var(--ink-strong);
+      border-color: var(--line-strong);
+      background: var(--action-primary);
+    }
+
+    /* =========================================================
+       Right Showcase Area: Emphasized & Swappable Devices
+       ========================================================= */
+    .devices-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 800px;
+    }
+
+    .devices-stage-container {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto auto;
+      align-items: center;
+      gap: 36px;
+      width: 100%;
+    }
+
+    /* Base styles for device figures */
+    figure {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .device-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-self: center;
+      will-change: transform, opacity;
+      user-select: none;
+      grid-row: 1; /* CRITICAL: Keep both devices on the exact same row */
+    }
+
+    /* Swap Overlay / Clickable target when de-emphasized */
+    .device-swap-trigger {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      border-radius: 40px;
+      background: rgba(8, 11, 13, 0.2);
+      border: 2px dashed transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      opacity: 0;
+      cursor: pointer;
+      transition: opacity 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .device-swap-trigger:hover,
+    .device-swap-trigger:focus-visible {
+      opacity: 1;
+      background: rgba(8, 11, 13, 0.55);
+      border-color: var(--accent);
+    }
+
+    .swap-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-raised);
+      border: 1px solid var(--line-strong);
+      color: var(--ink-strong);
+      font-size: 11px;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .swap-badge svg {
+      width: 13px;
+      height: 13px;
+      color: var(--accent);
+    }
+
+    /* =========================================================
+       State A: Phone Emphasized (Default)
+       ========================================================= */
+    .devices-stage[data-focused="phone"] .phone-preview {
+      grid-column: 1;
+      width: 376px;
+      z-index: 10;
+      opacity: 1;
+      filter: none;
+      --dial-size: 210px;
+      --dial-font: 26px;
+      --dial-target-font: 18px;
+      --dial-badge-font: 10.5px;
+      --dial-icon-size: 24px;
+    }
+
+    .devices-stage[data-focused="phone"] .phone-preview .device-swap-trigger {
+      display: none;
+    }
+
+    .devices-stage[data-focused="phone"] .computer-preview {
+      grid-column: 2;
+      width: 440px;
+      z-index: 5;
+      opacity: 0.85;
+      filter: brightness(0.92) contrast(0.95);
+      cursor: pointer;
+      --dial-size: 125px;
+      --dial-font: 15px;
+      --dial-target-font: 11px;
+      --dial-badge-font: 8.5px;
+      --dial-icon-size: 15px;
+    }
+
+    .devices-stage[data-focused="phone"] .computer-preview .device-swap-trigger {
+      border-radius: 20px;
+    }
+
+    .devices-stage[data-focused="phone"] .computer-dashboard-body {
+      grid-template-columns: 1fr;
+      padding: 6px 12px;
+    }
+
+    .devices-stage[data-focused="phone"] .desktop-side-panel {
+      display: none;
+    }
+
+    .devices-stage[data-focused="phone"] .computer-nav-tabs {
+      display: none;
+    }
+
+    /* =========================================================
+       State B: Computer Emphasized
+       ========================================================= */
+    .devices-stage[data-focused="computer"] .computer-preview {
+      grid-column: 1;
+      width: 720px;
+      z-index: 10;
+      opacity: 1;
+      filter: none;
+      --dial-size: 200px;
+      --dial-font: 26px;
+      --dial-target-font: 18px;
+      --dial-badge-font: 10.5px;
+      --dial-icon-size: 24px;
+    }
+
+    .devices-stage[data-focused="computer"] .computer-preview .device-swap-trigger {
+      display: none;
+    }
+
+    .devices-stage[data-focused="computer"] .computer-dashboard-body {
+      grid-template-columns: 170px 1fr 170px;
+      padding: 8px 16px;
+    }
+
+    .devices-stage[data-focused="computer"] .desktop-side-panel {
+      display: flex;
+    }
+
+    .devices-stage[data-focused="computer"] .computer-nav-tabs {
+      display: flex;
+    }
+
+    .devices-stage[data-focused="computer"] .phone-preview {
+      grid-column: 2;
+      width: 190px;
+      z-index: 5;
+      opacity: 0.85;
+      filter: brightness(0.92) contrast(0.95);
+      cursor: pointer;
+      --dial-size: 105px;
+      --dial-font: 13.5px;
+      --dial-target-font: 9.5px;
+      --dial-badge-font: 7.5px;
+      --dial-icon-size: 13px;
+    }
+
+    .devices-stage[data-focused="computer"] .phone-preview .quest-card {
+      padding: 6px 8px;
+      gap: 3px;
+    }
+
+    .devices-stage[data-focused="computer"] .phone-preview .quest-desc {
+      display: none;
+    }
+
+    .devices-stage[data-focused="computer"] .phone-preview .phone-stats-grid {
+      gap: 4px;
+    }
+
+    .devices-stage[data-focused="computer"] .phone-preview .phone-stat-cell {
+      padding: 4px 2px;
+    }
+
+    /* =========================================================
+       Phone Frame Styling
+       ========================================================= */
+    .phone {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 376 / 784;
+      padding: 9px;
+      border: 1px solid #534b46;
+      border-radius: 48px;
+      background: #292524;
+      box-shadow: 0 0 0 2px #6d625a, 0 0 0 4px #302b27, var(--shadow-device);
+      transition: box-shadow 200ms ease;
+    }
+
+    .phone::before,
+    .phone::after {
+      content: "";
+      position: absolute;
+      width: 4px;
+      background: #6d625a;
+    }
+
+    .phone::before {
+      right: -5px;
+      top: 169px;
+      height: 65px;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .phone::after {
+      left: -5px;
+      top: 135px;
+      height: 34px;
+      border-radius: 3px 0 0 3px;
+      box-shadow: 0 47px #6d625a;
+    }
+
+    .phone-screen {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid #141110;
+      border-radius: 38px;
+      background: var(--surface);
+    }
+
+    .statusbar {
+      position: relative;
+      display: flex;
+      flex: 0 0 42px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 22px 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      z-index: 5;
+    }
+
+    .island {
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      width: 96px;
+      height: 24px;
+      transform: translateX(-50%);
+      border-radius: 20px;
+      background: #100e0d;
+    }
+
+    .island::after {
+      content: "";
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #202329;
+      box-shadow: inset 0 0 0 2px #17191d;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-icons svg {
+      display: block;
+      width: 14px;
+      height: 11px;
+      fill: currentColor;
+    }
+
+    .status-icons .battery { width: 22px; }
+
+    .home-area {
+      display: grid;
+      flex: 0 0 20px;
+      place-items: center;
+      z-index: 5;
+    }
+
+    .home-indicator {
+      width: 110px;
+      height: 4px;
+      border-radius: 4px;
+      background: #d7ccc5;
+      opacity: 0.6;
+    }
+
+    /* =========================================================
+       Computer Frame Styling
+       ========================================================= */
+    .computer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .monitor {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 20px 12px 14px;
+      border: 1px solid #6d625a;
+      border-radius: 18px;
+      background: #292524;
+      box-shadow: 0 0 0 2px #302b27, var(--shadow-device);
+    }
+
+    .monitor::before {
+      content: "";
+      position: absolute;
+      top: 7px;
+      left: calc(50% - 3px);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #111112;
+      box-shadow: inset 0 0 0 2px #1e2228;
+    }
+
+    .computer-screen {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      border: 1px solid #141110;
+      border-radius: 6px;
+      background: var(--surface);
+    }
+
+    .taskbar {
+      display: flex;
+      flex: 0 0 34px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 10px;
+      border-top: 1px solid #332d29;
+      background: #181514;
+      color: #d7ccc5;
+      font-size: 10.5px;
+    }
+
+    .taskbar-apps,
+    .system-tray {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .taskbar-app {
+      display: grid;
+      width: 24px;
+      height: 24px;
+      place-items: center;
+    }
+
+    .taskbar svg {
+      display: block;
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .taskbar-launcher { color: #d6b6a4; }
+    .taskbar-folder { color: #d5b275; }
+    .taskbar-browser { color: #94b5c5; }
+    .system-tray svg { width: 12px; height: 12px; }
+
+    .taskbar-clock {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .monitor-stand {
+      width: 15%;
+      aspect-ratio: 2 / 1;
+      background: linear-gradient(#302925, #655b53);
+      clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%);
+    }
+
+    .monitor-base {
+      width: 34%;
+      height: clamp(5px, 0.9vw, 9px);
+      border: 1px solid #786b61;
+      border-radius: 50% 50% 4px 4px;
+      background: #5a5049;
+      box-shadow: 0 12px 24px #0007;
+    }
+
+    /* =========================================================
+       APP VIEWPORTS & CENTRAL PROGRESS DIAL
+       ========================================================= */
+    .app-viewport {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden; /* Avoid unsightly scrollbars */
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at 50% 35%, rgba(98, 200, 216, 0.08) 0%, rgba(17, 23, 27, 0) 70%), var(--surface);
+    }
+
+    /* ---------------------------------------------------------
+       Large Dial Component (Middle of Screen)
+       --------------------------------------------------------- */
+    .dial-hero-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+      position: relative;
+    }
+
+    .dial-svg-wrapper {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: var(--dial-size);
+      height: var(--dial-size);
+      transition: width 300ms ease, height 300ms ease;
+    }
+
+    .dial-svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      transform: rotate(-90deg);
+    }
+
+    .dial-track-circle {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 10;
+    }
+
+    .dial-tick-circle {
+      fill: none;
+      stroke: var(--line-strong);
+      stroke-width: 12;
+      stroke-dasharray: 2 68.9;
+      opacity: 0.7;
+    }
+
+    .dial-progress-circle {
+      fill: none;
+      stroke-linecap: round;
+      stroke-width: 10;
+      transition: stroke-dashoffset 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .dial-content-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4px;
+      pointer-events: none;
+      gap: 1px;
+    }
+
+    /* Lucide Footsteps Icon */
+    .dial-footsteps-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      margin-bottom: 1px;
+      filter: drop-shadow(0 0 6px rgba(98, 200, 216, 0.35));
+    }
+
+    .dial-footsteps-icon svg {
+      width: var(--dial-icon-size);
+      height: var(--dial-icon-size);
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      transition: width 200ms ease, height 200ms ease;
+    }
+
+    /* 5k / 10k Ratio */
+    .dial-metric-ratio {
+      font-family: var(--mono);
+      font-size: var(--dial-font);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--ink-strong);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      transition: font-size 200ms ease;
+    }
+
+    .dial-metric-ratio .target {
+      font-size: var(--dial-target-font);
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Percentage Badge (Design Guide pill) */
+    .dial-percentage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      background: var(--good-soft);
+      color: var(--good);
+      font-family: var(--mono);
+      font-size: var(--dial-badge-font);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      transition: font-size 200ms ease;
+    }
+
+    .dial-subtitle {
+      font-family: var(--mono);
+      font-size: calc(var(--dial-badge-font) * 0.88);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ---------------------------------------------------------
+       Phone App Screen Details
+       --------------------------------------------------------- */
+    .phone-app-content {
+      padding: 6px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+      justify-content: space-between;
+    }
+
+    .phone-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .player-tag {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .avatar-pip {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #62c8d8, #b9aaef);
+      display: grid;
+      place-items: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: #080b0d;
+    }
+
+    .player-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink-strong);
+    }
+
+    .player-level {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      color: var(--accent);
+    }
+
+    .sync-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      color: var(--muted);
+    }
+
+    .sync-status-badge .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--good);
+    }
+
+    /* Mobile Quest Card */
+    .quest-card {
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      border: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .quest-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quest-tag {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--caution);
+      font-weight: 600;
+    }
+
+    .quest-reward {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      color: var(--good);
+      font-weight: 600;
+    }
+
+    .quest-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-strong);
+      margin: 0;
+    }
+
+    .quest-desc {
+      font-size: 10.5px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.35;
+    }
+
+    /* Mobile Metric Strip */
+    .phone-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .phone-stat-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 3px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .phone-stat-label {
+      font-family: var(--mono);
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .phone-stat-val {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--ink-strong);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------------------------------------------------------
+       Computer App Screen Details
+       --------------------------------------------------------- */
+    .computer-app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .computer-app-navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 14px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-raised);
+    }
+
+    .app-brand-area {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .app-logo-glyph {
+      width: 17px;
+      height: 17px;
+      border-radius: 4px;
+      background: var(--accent);
+      color: #080b0d;
+      display: grid;
+      place-items: center;
+    }
+
+    .app-logo-glyph svg {
+      width: 11px;
+      height: 11px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.5;
+    }
+
+    .app-logo-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-strong);
+      letter-spacing: -0.01em;
+    }
+
+    .computer-nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-tab-item {
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .nav-tab-item.active {
+      background: var(--action-primary);
+      color: var(--ink-strong);
+      font-weight: 600;
+    }
+
+    .computer-user-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      color: var(--ink);
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-family: var(--mono);
+      font-size: 9.5px;
+      padding: 2px 5px;
+      border-radius: var(--radius-pill);
+      background: var(--good-soft);
+      color: var(--good);
+    }
+
+    .computer-dashboard-body {
+      flex: 1;
+      display: grid;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 14px;
+      min-height: 0;
+    }
+
+    /* Flanking Panels on Desktop */
+    .desktop-side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      border: 1px solid var(--line);
+    }
+
+    .side-panel-title {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 4px;
+    }
+
+    .expedition-checkpoint {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .checkpoint-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-strong);
+    }
+
+    .checkpoint-sub {
+      font-size: 9.5px;
+      color: var(--muted);
+    }
+
+    .telemetry-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+    }
+
+    .telemetry-label { color: var(--muted); }
+    .telemetry-val {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--ink-strong);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Center Stage inside Desktop */
+    .desktop-center-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* =========================================================
+       Reduced Motion & Responsive Breakpoints
+       ========================================================= */
+    @media (prefers-reduced-motion: reduce) {
+      .dial-progress-circle,
+      .device-wrapper,
+      .switcher-btn,
+      .simulator-slider::-webkit-slider-thumb {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    @media (max-width: 1280px) {
+      .page {
+        grid-template-columns: 340px minmax(0, 1fr);
+        gap: 36px;
+        padding: 24px 28px;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .page {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .sidebar-narrative {
+        max-width: 680px;
+      }
+      .devices-stage {
+        min-height: auto;
+        justify-content: center;
+      }
+      .devices-stage-container {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .page {
+        padding: 20px 16px;
+      }
+      .devices-stage-container {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .devices-stage[data-focused="phone"] .computer-preview,
+      .devices-stage[data-focused="computer"] .phone-preview {
+        display: none;
+      }
+      .devices-stage[data-focused="phone"] .phone-preview,
+      .devices-stage[data-focused="computer"] .computer-preview {
+        width: 100%;
+        grid-column: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <!-- =======================================================
+         LEFT COLUMN: Story, Narrative, & Interactive Controls
+         ======================================================= -->
+    <aside class="sidebar-narrative">
+      <div class="brand-eyebrow">
+        <span class="pulsing-dot" aria-hidden="true"></span>
+        Exercise Gaming Platform
+      </div>
+
+      <header class="narrative-header">
+        <h1>Aether Stride: Step into the Game</h1>
+        <p class="lead">Turn every physical step into virtual progression, territory conquest, and cooperative boss encounters.</p>
+      </header>
+
+      <section class="narrative-body">
+        <p>
+          Aether Stride bridges real-world daily mobility with an immersive RPG campaign. Carry your phone to automatically accumulate steps during your daily routine, then return to your desktop battlestation to command guild raids and review expedition telemetry.
+        </p>
+
+        <ul class="feature-list" role="list">
+          <li class="feature-item">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/>
+              <path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/>
+              <path d="M16 17h4"/>
+              <path d="M4 13h4"/>
+            </svg>
+            <div class="feature-item-text">
+              <strong>Unified Central Progress Dial</strong>
+              <span>A high-visibility circular gauge right in the center of both screens tracks daily cadence toward your 10,000-step objective.</span>
+            </div>
+          </li>
+
+          <li class="feature-item">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="20" height="14" x="2" y="3" rx="2"/>
+              <line x1="8" x2="16" y1="21" y2="21"/>
+              <line x1="12" x2="12" y1="17" y2="21"/>
+            </svg>
+            <div class="feature-item-text">
+              <strong>Synchronous Duality</strong>
+              <span>Mobile captures cadence in the field; desktop commands strategic team encounters and detailed analysis.</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Interactive Device Emphasis Controller -->
+      <div class="control-card">
+        <div class="control-card-header">
+          <span class="control-card-label">Emphasized Device</span>
+          <span class="swap-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m16 3 4 4-4 4"/>
+              <path d="M20 7H4"/>
+              <path d="m8 21-4-4 4-4"/>
+              <path d="M4 17h16"/>
+            </svg>
+            Click smaller device to swap
+          </span>
+        </div>
+
+        <div class="switcher-pill-group" role="tablist" aria-label="Device emphasis toggle">
+          <button type="button" class="switcher-btn active" id="btn-focus-phone" role="tab" aria-selected="true" aria-controls="phone-preview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>
+            Phone View
+          </button>
+          <button type="button" class="switcher-btn" id="btn-focus-computer" role="tab" aria-selected="false" aria-controls="computer-preview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+            Desktop View
+          </button>
+        </div>
+
+        <!-- Live Step Simulator -->
+        <div class="simulator-box">
+          <div class="simulator-row">
+            <span class="simulator-label">Simulate Step Cadence</span>
+            <span class="simulator-value" id="sim-step-display">5,400 / 10,000</span>
+          </div>
+          <input type="range" class="simulator-slider" id="step-slider" min="0" max="15000" step="100" value="5400" aria-label="Step cadence simulator slider">
+          <div class="preset-chips" aria-label="Step presets">
+            <button type="button" class="preset-chip" data-steps="2500">2.5k</button>
+            <button type="button" class="preset-chip" data-steps="5000">5k</button>
+            <button type="button" class="preset-chip" data-steps="7500">7.5k</button>
+            <button type="button" class="preset-chip" data-steps="10000">10k</button>
+            <button type="button" class="preset-chip" data-steps="12500">12.5k</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =======================================================
+         RIGHT COLUMN: Device Showcase Stage
+         ======================================================= -->
+    <main class="devices-stage" id="devices-stage" data-focused="phone" aria-label="Interactive Device Demos">
+      <div class="devices-stage-container">
+
+        <!-- ---------------------------------------------------
+             PHONE PREVIEW FRAME
+             --------------------------------------------------- -->
+        <figure class="device-wrapper phone-preview" id="phone-preview" aria-label="Mobile Companion Screen">
+          <div class="device-swap-trigger" tabindex="0" role="button" aria-label="Emphasize Phone view and swap places with Desktop">
+            <div class="swap-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m16 3 4 4-4 4"/>
+                <path d="M20 7H4"/>
+                <path d="m8 21-4-4 4-4"/>
+                <path d="M4 17h16"/>
+              </svg>
+              <span>Click to enlarge Phone</span>
+            </div>
+          </div>
+
+          <div class="phone">
+            <div class="phone-screen">
+              <!-- iOS Status Bar -->
+              <div class="statusbar" aria-hidden="true">
+                <span>9:41</span>
+                <span class="island"></span>
+                <div class="status-icons">
+                  <svg viewBox="0 0 18 14">
+                    <rect x="0" y="10" width="3" height="4" rx=".5"/>
+                    <rect x="5" y="7" width="3" height="7" rx=".5"/>
+                    <rect x="10" y="4" width="3" height="10" rx=".5"/>
+                    <rect x="15" y="1" width="3" height="13" rx=".5"/>
+                  </svg>
+                  <svg viewBox="0 0 20 15">
+                    <path d="M1 4Q10-3 19 4l-2 2Q10 1 3 6Zm4 4q5-4 10 0l-2 2q-3-2-6 0Zm3 4q2-2 4 0l-2 3Z"/>
+                  </svg>
+                  <svg class="battery" viewBox="0 0 27 14">
+                    <rect x="1" y="2" width="22" height="10" rx="2" fill="none" stroke="currentColor"/>
+                    <rect x="3" y="4" width="17" height="6" rx="1"/>
+                    <rect x="25" y="5" width="2" height="4" rx="1"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Phone App Content -->
+              <div class="app-viewport" id="phone-app">
+                <div class="phone-app-content">
+                  <!-- Header Row -->
+                  <div class="phone-header-row">
+                    <div class="player-tag">
+                      <div class="avatar-pip" aria-hidden="true">S</div>
+                      <div>
+                        <div class="player-name">Strider Sarah</div>
+                        <div class="player-level">LVL 14 EXPLORER</div>
+                      </div>
+                    </div>
+                    <div class="sync-status-badge">
+                      <span class="dot" aria-hidden="true"></span>
+                      PC Linked
+                    </div>
+                  </div>
+
+                  <!-- CENTRAL PROGRESS DIAL (MIDDLE OF SCREEN) -->
+                  <section class="dial-hero-container" aria-label="Step completion progress gauge">
+                    <div class="dial-svg-wrapper">
+                      <svg class="dial-svg" viewBox="0 0 220 220" aria-hidden="true">
+                        <defs>
+                          <linearGradient id="phoneDialGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="var(--accent)" />
+                            <stop offset="100%" stop-color="var(--good)" />
+                          </linearGradient>
+                        </defs>
+                        <circle class="dial-track-circle" cx="110" cy="110" r="90" />
+                        <circle class="dial-tick-circle" cx="110" cy="110" r="90" />
+                        <circle class="dial-progress-circle" id="phone-dial-ring" cx="110" cy="110" r="90"
+                          stroke="url(#phoneDialGradient)"
+                          stroke-dasharray="565.48"
+                          stroke-dashoffset="260.12" />
+                      </svg>
+
+                      <div class="dial-content-center">
+                        <!-- Lucide Footsteps Icon -->
+                        <div class="dial-footsteps-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24">
+                            <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/>
+                            <path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/>
+                            <path d="M16 17h4"/>
+                            <path d="M4 13h4"/>
+                          </svg>
+                        </div>
+
+                        <!-- 5k / 10k metric -->
+                        <div class="dial-metric-ratio">
+                          <span class="phone-curr-steps">5.4k</span>
+                          <span class="ratio-slash">/</span>
+                          <span class="target">10k</span>
+                        </div>
+
+                        <!-- Percentage Badge -->
+                        <div class="dial-percentage-badge">
+                          <span class="phone-percent-val">54%</span>
+                          <span>COMPLETED</span>
+                        </div>
+
+                        <div class="dial-subtitle">DAILY EXPEDITION</div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <!-- Active Quest Card -->
+                  <div class="quest-card">
+                    <div class="quest-card-top">
+                      <span class="quest-tag">Zone 3 • Shadow Pass</span>
+                      <span class="quest-reward">+600 XP</span>
+                    </div>
+                    <h3 class="quest-title">Approaching Ancient Vault</h3>
+                    <p class="quest-desc">4,600 more steps until today's dungeon boss encounter unlocks.</p>
+                  </div>
+
+                  <!-- Telemetry Stats Strip -->
+                  <div class="phone-stats-grid">
+                    <div class="phone-stat-cell">
+                      <span class="phone-stat-label">Distance</span>
+                      <span class="phone-stat-val phone-stat-km">4.0 km</span>
+                    </div>
+                    <div class="phone-stat-cell">
+                      <span class="phone-stat-label">Burn</span>
+                      <span class="phone-stat-val phone-stat-kcal">227 kcal</span>
+                    </div>
+                    <div class="phone-stat-cell">
+                      <span class="phone-stat-label">Active</span>
+                      <span class="phone-stat-val phone-stat-time">47 min</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- iOS Home Indicator -->
+              <div class="home-area" aria-hidden="true">
+                <div class="home-indicator"></div>
+              </div>
+            </div>
+          </div>
+        </figure>
+
+        <!-- ---------------------------------------------------
+             COMPUTER PREVIEW FRAME
+             --------------------------------------------------- -->
+        <figure class="device-wrapper computer-preview" id="computer-preview" aria-label="Desktop Command Station Screen">
+          <div class="device-swap-trigger" tabindex="0" role="button" aria-label="Emphasize Desktop view and swap places with Phone">
+            <div class="swap-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m16 3 4 4-4 4"/>
+                <path d="M20 7H4"/>
+                <path d="m8 21-4-4 4-4"/>
+                <path d="M4 17h16"/>
+              </svg>
+              <span>Click to enlarge Desktop</span>
+            </div>
+          </div>
+
+          <div class="computer">
+            <div class="monitor">
+              <div class="computer-screen">
+                <!-- Desktop Application Viewport -->
+                <div class="app-viewport" id="computer-app">
+                  <div class="computer-app-shell">
+                    <!-- Desktop Chrome Header / Nav -->
+                    <div class="computer-app-navbar">
+                      <div class="app-brand-area">
+                        <div class="app-logo-glyph" aria-hidden="true">
+                          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+                        <span class="app-logo-title">Aether Stride Command</span>
+                      </div>
+
+                      <div class="computer-nav-tabs" role="tablist">
+                        <span class="nav-tab-item active" role="tab">Expedition</span>
+                        <span class="nav-tab-item" role="tab">Guild Battles</span>
+                        <span class="nav-tab-item" role="tab">Inventory</span>
+                        <span class="nav-tab-item" role="tab">Cadence Analytics</span>
+                      </div>
+
+                      <div class="computer-user-badge">
+                        <span class="user-pill">● Online</span>
+                        <span>Sarah (Lvl 14)</span>
+                      </div>
+                    </div>
+
+                    <!-- Desktop Central Stage with Large Dial & Flanking Telemetry -->
+                    <div class="computer-dashboard-body">
+                      <!-- Left Panel: Campaign Map Objective -->
+                      <div class="desktop-side-panel">
+                        <div class="side-panel-title">Active Campaign</div>
+                        <div class="expedition-checkpoint">
+                          <span class="checkpoint-name">Whispering Range</span>
+                          <span class="checkpoint-sub">Tier 3 Dungeon Raid</span>
+                        </div>
+                        <div class="telemetry-row">
+                          <span class="telemetry-label">Party Cadence:</span>
+                          <span class="telemetry-val">114 spm</span>
+                        </div>
+                        <div class="telemetry-row">
+                          <span class="telemetry-label">XP Multiplier:</span>
+                          <span class="telemetry-val">1.5× Active</span>
+                        </div>
+                        <div class="telemetry-row">
+                          <span class="telemetry-label">Territory:</span>
+                          <span class="telemetry-val">Captured (54%)</span>
+                        </div>
+                      </div>
+
+                      <!-- CENTER STAGE: LARGE DIAL IN THE MIDDLE OF THE SCREEN -->
+                      <div class="desktop-center-stage">
+                        <section class="dial-hero-container" aria-label="Desktop step completion gauge">
+                          <div class="dial-svg-wrapper">
+                            <svg class="dial-svg" viewBox="0 0 220 220" aria-hidden="true">
+                              <defs>
+                                <linearGradient id="compDialGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                  <stop offset="0%" stop-color="var(--accent)" />
+                                  <stop offset="100%" stop-color="var(--good)" />
+                                </linearGradient>
+                              </defs>
+                              <circle class="dial-track-circle" cx="110" cy="110" r="90" />
+                              <circle class="dial-tick-circle" cx="110" cy="110" r="90" />
+                              <circle class="dial-progress-circle" id="comp-dial-ring" cx="110" cy="110" r="90"
+                                stroke="url(#compDialGradient)"
+                                stroke-dasharray="565.48"
+                                stroke-dashoffset="260.12" />
+                            </svg>
+
+                            <div class="dial-content-center">
+                              <!-- Lucide Footsteps Icon -->
+                              <div class="dial-footsteps-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                  <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/>
+                                  <path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/>
+                                  <path d="M16 17h4"/>
+                                  <path d="M4 13h4"/>
+                                </svg>
+                              </div>
+
+                              <!-- 5k / 10k metric -->
+                              <div class="dial-metric-ratio">
+                                <span class="comp-curr-steps">5.4k</span>
+                                <span class="ratio-slash">/</span>
+                                <span class="target">10k</span>
+                              </div>
+
+                              <!-- Percentage Badge -->
+                              <div class="dial-percentage-badge">
+                                <span class="comp-percent-val">54%</span>
+                                <span>COMPLETED</span>
+                              </div>
+
+                              <div class="dial-subtitle">DAILY STRIDE TARGET</div>
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+
+                      <!-- Right Panel: Raid Boss & Biometric Telemetry -->
+                      <div class="desktop-side-panel">
+                        <div class="side-panel-title">Raid Boss Telemetry</div>
+                        <div class="expedition-checkpoint">
+                          <span class="checkpoint-name">Shadow Behemoth</span>
+                          <span class="checkpoint-sub">Defeated at 10k steps</span>
+                        </div>
+                        <div class="telemetry-row">
+                          <span class="telemetry-label">Boss HP Left:</span>
+                          <span class="telemetry-val comp-boss-hp">46%</span>
+                        </div>
+                        <div class="telemetry-row">
+                          <span class="telemetry-label">Active Burn:</span>
+                          <span class="telemetry-val comp-stat-kcal">227 kcal</span>
+                        </div>
+                        <div class="telemetry-row">
+                          <span class="telemetry-label">Traversed:</span>
+                          <span class="telemetry-val comp-stat-km">4.0 km</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Desktop OS Taskbar -->
+                <div class="taskbar" aria-hidden="true">
+                  <div class="taskbar-apps">
+                    <span class="taskbar-app taskbar-launcher">
+                      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                        <path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/>
+                      </svg>
+                    </span>
+                    <span class="taskbar-app">
+                      <svg viewBox="0 0 24 24">
+                        <circle cx="10.5" cy="10.5" r="6.5"/>
+                        <path d="m16 16 5 5"/>
+                      </svg>
+                    </span>
+                    <span class="taskbar-app taskbar-folder">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M3 7V5h6l2 2h10v12H3Z" fill="currentColor" stroke="none" opacity=".65"/>
+                        <path d="M3 10h18v9H3Z" fill="currentColor" stroke="none"/>
+                      </svg>
+                    </span>
+                    <span class="taskbar-app taskbar-browser">
+                      <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"/>
+                        <ellipse cx="12" cy="12" rx="4" ry="9"/>
+                        <path d="M3 12h18"/>
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="system-tray">
+                    <svg viewBox="0 0 24 24"><path d="m8 14 4-4 4 4"/></svg>
+                    <svg viewBox="0 0 24 24">
+                      <path d="M3 9a14 14 0 0 1 18 0M6 12a9 9 0 0 1 12 0m-9 3a4.5 4.5 0 0 1 6 0"/>
+                      <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+                    </svg>
+                    <svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4Zm12 0a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/></svg>
+                    <span class="taskbar-clock">9:41 AM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="monitor-stand" aria-hidden="true"></div>
+            <div class="monitor-base" aria-hidden="true"></div>
+          </div>
+        </figure>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const TARGET_STEPS = 10000;
+      const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 90; // ~565.487
+
+      // DOM Elements
+      const stageEl = document.getElementById('devices-stage');
+      const phonePreview = document.getElementById('phone-preview');
+      const computerPreview = document.getElementById('computer-preview');
+      const btnFocusPhone = document.getElementById('btn-focus-phone');
+      const btnFocusComputer = document.getElementById('btn-focus-computer');
+
+      const stepSlider = document.getElementById('step-slider');
+      const simStepDisplay = document.getElementById('sim-step-display');
+      const presetChips = document.querySelectorAll('.preset-chip');
+
+      // Dial Elements
+      const phoneDialRing = document.getElementById('phone-dial-ring');
+      const compDialRing = document.getElementById('comp-dial-ring');
+
+      const phoneCurrStepsEl = document.querySelector('.phone-curr-steps');
+      const compCurrStepsEl = document.querySelector('.comp-curr-steps');
+      const phonePercentVal = document.querySelector('.phone-percent-val');
+      const compPercentVal = document.querySelector('.comp-percent-val');
+
+      const phoneStatKm = document.querySelector('.phone-stat-km');
+      const phoneStatKcal = document.querySelector('.phone-stat-kcal');
+      const phoneStatTime = document.querySelector('.phone-stat-time');
+      const compStatKm = document.querySelector('.comp-stat-km');
+      const compStatKcal = document.querySelector('.comp-stat-kcal');
+      const compBossHp = document.querySelector('.comp-boss-hp');
+
+      let currentFocus = 'phone';
+      let isAnimating = false;
+
+      // =======================================================
+      // 1. FLIP Device Swapping with Spring-like Cubic Bezier
+      // =======================================================
+      function swapFocus(nextFocus) {
+        if (currentFocus === nextFocus || isAnimating) return;
+
+        // Respect reduced motion if requested
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (prefersReducedMotion) {
+          currentFocus = nextFocus;
+          stageEl.dataset.focused = nextFocus;
+          updateButtonStates();
+          return;
+        }
+
+        isAnimating = true;
+
+        // 1. First: measure bounding boxes before DOM change
+        const firstPhone = phonePreview.getBoundingClientRect();
+        const firstComp = computerPreview.getBoundingClientRect();
+
+        // 2. Change focus state
+        currentFocus = nextFocus;
+        stageEl.dataset.focused = nextFocus;
+        updateButtonStates();
+
+        // 3. Last: measure bounding boxes after DOM change
+        const lastPhone = phonePreview.getBoundingClientRect();
+        const lastComp = computerPreview.getBoundingClientRect();
+
+        // 4. Invert: compute translate delta and uniform scale
+        const pDx = firstPhone.left - lastPhone.left;
+        const pDy = firstPhone.top - lastPhone.top;
+        const pScale = firstPhone.width / lastPhone.width;
+
+        const cDx = firstComp.left - lastComp.left;
+        const cDy = firstComp.top - lastComp.top;
+        const cScale = firstComp.width / lastComp.width;
+
+        // 5. Play: Web Animations API for 60fps hardware-accelerated glide
+        const duration = 540;
+        const easing = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
+
+        const phoneAnim = phonePreview.animate([
+          {
+            transform: `translate(${pDx}px, ${pDy}px) scale(${pScale})`,
+            zIndex: nextFocus === 'phone' ? 20 : 5
+          },
+          {
+            transform: 'translate(0px, 0px) scale(1)',
+            zIndex: nextFocus === 'phone' ? 20 : 5
+          }
+        ], {
+          duration,
+          easing,
+          fill: 'none'
+        });
+
+        const compAnim = computerPreview.animate([
+          {
+            transform: `translate(${cDx}px, ${cDy}px) scale(${cScale})`,
+            zIndex: nextFocus === 'computer' ? 20 : 5
+          },
+          {
+            transform: 'translate(0px, 0px) scale(1)',
+            zIndex: nextFocus === 'computer' ? 20 : 5
+          }
+        ], {
+          duration,
+          easing,
+          fill: 'none'
+        });
+
+        Promise.all([phoneAnim.finished, compAnim.finished]).then(() => {
+          isAnimating = false;
+        }).catch(() => {
+          isAnimating = false;
+        });
+      }
+
+      function updateButtonStates() {
+        if (currentFocus === 'phone') {
+          btnFocusPhone.classList.add('active');
+          btnFocusPhone.setAttribute('aria-selected', 'true');
+          btnFocusComputer.classList.remove('active');
+          btnFocusComputer.setAttribute('aria-selected', 'false');
+        } else {
+          btnFocusComputer.classList.add('active');
+          btnFocusComputer.setAttribute('aria-selected', 'true');
+          btnFocusPhone.classList.remove('active');
+          btnFocusPhone.setAttribute('aria-selected', 'false');
+        }
+      }
+
+      // Click listeners for left switcher buttons
+      btnFocusPhone.addEventListener('click', () => swapFocus('phone'));
+      btnFocusComputer.addEventListener('click', () => swapFocus('computer'));
+
+      // Click on the smaller device to trigger swap
+      phonePreview.querySelector('.device-swap-trigger').addEventListener('click', () => {
+        swapFocus('phone');
+      });
+
+      computerPreview.querySelector('.device-swap-trigger').addEventListener('click', () => {
+        swapFocus('computer');
+      });
+
+      // Keyboard support (Enter & Space on swap trigger)
+      [phonePreview, computerPreview].forEach(preview => {
+        const trigger = preview.querySelector('.device-swap-trigger');
+        trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const target = preview.id === 'phone-preview' ? 'phone' : 'computer';
+            swapFocus(target);
+          }
+        });
+      });
+
+      // =======================================================
+      // 2. Real-Time Cadence & Dial Progress Synchronizer
+      // =======================================================
+      function formatK(val) {
+        if (val >= 1000) {
+          const k = val / 1000;
+          return k % 1 === 0 ? `${k}k` : `${k.toFixed(1)}k`;
+        }
+        return val.toLocaleString();
+      }
+
+      function updateSteps(steps) {
+        steps = Math.max(0, parseInt(steps, 10) || 0);
+
+        const ratio = steps / TARGET_STEPS;
+        const percent = Math.round(ratio * 100);
+        const clampedRatio = Math.min(Math.max(ratio, 0), 1.0);
+
+        // Circular stroke-dashoffset calculation
+        const strokeOffset = CIRCLE_CIRCUMFERENCE * (1 - clampedRatio);
+
+        phoneDialRing.style.strokeDashoffset = strokeOffset;
+        compDialRing.style.strokeDashoffset = strokeOffset;
+
+        // Metric texts
+        const formattedK = formatK(steps);
+        phoneCurrStepsEl.textContent = formattedK;
+        compCurrStepsEl.textContent = formattedK;
+
+        phonePercentVal.textContent = `${percent}%`;
+        compPercentVal.textContent = `${percent}%`;
+
+        // Left sidebar readout
+        simStepDisplay.textContent = `${steps.toLocaleString()} / 10,000`;
+
+        // Derived stats
+        const km = (steps * 0.00075).toFixed(1);
+        const kcal = Math.round(steps * 0.042);
+        const mins = Math.round(steps / 115);
+
+        phoneStatKm.textContent = `${km} km`;
+        phoneStatKcal.textContent = `${kcal} kcal`;
+        phoneStatTime.textContent = `${mins} min`;
+
+        compStatKm.textContent = `${km} km`;
+        compStatKcal.textContent = `${kcal} kcal`;
+
+        // Raid boss HP (decreases as steps increase)
+        const bossHpLeft = Math.max(0, 100 - percent);
+        compBossHp.textContent = `${bossHpLeft}%`;
+      }
+
+      // Slider listener
+      stepSlider.addEventListener('input', (e) => {
+        updateSteps(e.target.value);
+      });
+
+      // Preset chips listeners
+      presetChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const val = chip.getAttribute('data-steps');
+          stepSlider.value = val;
+          updateSteps(val);
+        });
+      });
+
+      // Initial step calculation on load
+      updateSteps(stepSlider.value);
+
+    })();
+  </script>
+</body>
+</html>

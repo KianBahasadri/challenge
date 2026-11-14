@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#191615">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Phone and computer demo frames for the exercise gaming app.">
+  <title>Exercise gaming app — step dial demo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #191615;
+      --screen: #252120;
+      --surface: #2f2a28;
+      --surface-border: #443a34;
+      --ink: #f0e5dc;
+      --ink-muted: #d7ccc5;
+      --ink-dim: #9c8f86;
+      --accent-gold: #d5b275;
+      --accent-peach: #d6b6a4;
+      --accent-blue: #94b5c5;
+      --dial-track: #38312e;
+      font-family: Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .page {
+      width: min(100%, 1560px);
+      min-height: 100svh;
+      margin: auto;
+      padding: 36px 48px 56px;
+      display: grid;
+      grid-template-columns: minmax(300px, 440px) minmax(0, 1fr);
+      align-items: center;
+      gap: 48px;
+    }
+
+    /* Left side narrative column */
+    .intro-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-right: 12px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 6px 12px;
+      border: 1px solid var(--surface-border);
+      border-radius: 999px;
+      background: #231f1e;
+      color: var(--accent-gold);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .intro-title {
+      margin: 0;
+      font-size: clamp(32px, 3.2vw, 46px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    .intro-lead {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--ink-muted);
+    }
+
+    .intro-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .meta-card {
+      padding: 16px;
+      border: 1px solid var(--surface-border);
+      border-radius: 14px;
+      background: #221e1d;
+    }
+
+    .meta-card-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-bottom: 4px;
+    }
+
+    .meta-card-label {
+      font-size: 13px;
+      color: var(--ink-dim);
+      line-height: 1.4;
+    }
+
+    .swap-hint {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px dashed #534b46;
+      background: #201c1b;
+      color: var(--ink-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .swap-hint svg {
+      flex: 0 0 18px;
+      width: 18px;
+      height: 18px;
+      stroke: var(--accent-peach);
+      fill: none;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Right side interactive device stage */
+    .devices {
+      position: relative;
+      width: 100%;
+      height: 760px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    figure {
+      min-width: 0;
+      margin: 0;
+    }
+
+    .device-preview {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: center center;
+      transition:
+        transform 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, opacity, filter;
+    }
+
+    .phone-preview {
+      width: 356px;
+    }
+
+    .computer-preview {
+      width: 780px;
+    }
+
+    /* Active vs Inactive positioning & visual clarity */
+    .device-preview.is-active {
+      z-index: 3;
+      opacity: 1;
+      filter: none;
+      cursor: default;
+    }
+
+    .device-preview.is-inactive {
+      z-index: 2;
+      opacity: 0.76;
+      cursor: pointer;
+    }
+
+    .device-preview.is-inactive:hover,
+    .device-preview.is-inactive:focus-visible {
+      opacity: 0.9;
+      outline: none;
+    }
+
+    /* When phone is emphasized: Phone is big & centered-left, Computer is small in bottom-right */
+    .devices[data-active="phone"] .phone-preview {
+      transform: translate(-66%, -50%) scale(1);
+    }
+
+    .devices[data-active="phone"] .computer-preview {
+      transform: translate(-2%, 22%) scale(0.42);
+    }
+
+    .devices[data-active="phone"] .computer-preview:hover,
+    .devices[data-active="phone"] .computer-preview:focus-visible {
+      transform: translate(-2%, 20%) scale(0.44);
+    }
+
+    /* When computer is emphasized: Computer is big & centered-right, Phone is small in bottom-left */
+    .devices[data-active="computer"] .computer-preview {
+      transform: translate(-42%, -50%) scale(1);
+    }
+
+    .devices[data-active="computer"] .phone-preview {
+      transform: translate(-150%, 16%) scale(0.43);
+    }
+
+    .devices[data-active="computer"] .phone-preview:hover,
+    .devices[data-active="computer"] .phone-preview:focus-visible {
+      transform: translate(-150%, 14%) scale(0.45);
+    }
+
+    /* De-emphasize fine text in the smaller device while keeping shapes & layout clear */
+    .device-preview .detail-text {
+      transition:
+        filter 0.5s ease,
+        opacity 0.5s ease;
+    }
+
+    .device-preview.is-inactive .detail-text {
+      filter: blur(4.5px);
+      opacity: 0.38;
+    }
+
+    .device-preview.is-inactive .statusbar,
+    .device-preview.is-inactive .taskbar {
+      filter: blur(1.5px);
+      opacity: 0.7;
+    }
+
+    /* Prevent accidental scrolling inside the inactive preview so clicking swaps cleanly */
+    .device-preview.is-inactive .app-viewport {
+      pointer-events: none;
+    }
+
+    /* Subtle badge on the inactive device */
+    .swap-badge {
+      position: absolute;
+      left: 50%;
+      bottom: -46px;
+      transform: translateX(-50%) scale(2.2);
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid #6d625a;
+      background: #292524e6;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      box-shadow: 0 8px 20px #0008;
+    }
+
+    .device-preview.is-inactive .swap-badge {
+      opacity: 0.92;
+    }
+
+    /* Device frames from index.html */
+    .phone {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 376 / 784;
+      padding: 9px;
+      border: 1px solid #534b46;
+      border-radius: 48px;
+      background: #292524;
+      box-shadow: 0 0 0 2px #6d625a, 0 0 0 4px #302b27,
+        0 24px 70px -15px #0009;
+    }
+
+    .phone::before,
+    .phone::after {
+      content: "";
+      position: absolute;
+      width: 4px;
+      background: #6d625a;
+    }
+
+    .phone::before {
+      right: -5px;
+      top: 169px;
+      height: 65px;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .phone::after {
+      left: -5px;
+      top: 135px;
+      height: 34px;
+      border-radius: 3px 0 0 3px;
+      box-shadow: 0 47px #6d625a;
+    }
+
+    .phone-screen {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid #141110;
+      border-radius: 38px;
+      background: var(--screen);
+    }
+
+    .statusbar {
+      position: relative;
+      display: flex;
+      flex: 0 0 45px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 24px 0;
+      font-size: 11px;
+      font-weight: 600;
+      transition: filter 0.5s ease, opacity 0.5s ease;
+    }
+
+    .island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 100px;
+      height: 25px;
+      transform: translateX(-50%);
+      border-radius: 20px;
+      background: #100e0d;
+    }
+
+    .island::after {
+      content: "";
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #202329;
+      box-shadow: inset 0 0 0 2px #17191d;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-icons svg {
+      display: block;
+      width: 15px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    .status-icons .battery { width: 23px; }
+
+    .app-viewport {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      overscroll-behavior: contain;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .home-area {
+      display: grid;
+      flex: 0 0 25px;
+      place-items: center;
+    }
+
+    .home-indicator {
+      width: 116px;
+      height: 4px;
+      border-radius: 4px;
+      background: #d7ccc5;
+    }
+
+    .computer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .monitor {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 23px 13px 18px;
+      border: 1px solid #6d625a;
+      border-radius: 20px;
+      background: #292524;
+      box-shadow: 0 0 0 2px #302b27, 0 24px 70px -15px #0009;
+    }
+
+    .monitor::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: calc(50% - 3px);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #111112;
+      box-shadow: inset 0 0 0 2px #1e2228;
+    }
+
+    .computer-screen {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      border: 1px solid #141110;
+      border-radius: 6px;
+      background: var(--screen);
+    }
+
+    .taskbar {
+      display: flex;
+      flex: 0 0 42px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 12px;
+      border-top: 1px solid #443a34;
+      background: #1c1917;
+      color: #d7ccc5;
+      transition: filter 0.5s ease, opacity 0.5s ease;
+    }
+
+    .taskbar-apps,
+    .system-tray {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .taskbar-app {
+      display: grid;
+      width: 28px;
+      height: 30px;
+      place-items: center;
+    }
+
+    .taskbar svg {
+      display: block;
+      width: 19px;
+      height: 19px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .taskbar-launcher { color: #d6b6a4; }
+    .taskbar-folder { color: #d5b275; }
+    .taskbar-browser { color: #94b5c5; }
+    .system-tray svg { width: 14px; height: 14px; }
+
+    .taskbar-clock {
+      font-size: 10px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .monitor-stand {
+      width: 15%;
+      aspect-ratio: 2 / 1;
+      background: linear-gradient(#302925, #655b53);
+      clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%);
+    }
+
+    .monitor-base {
+      width: 34%;
+      height: clamp(7px, 1vw, 12px);
+      border: 1px solid #786b61;
+      border-radius: 50% 50% 4px 4px;
+      background: #5a5049;
+      box-shadow: 0 12px 24px #0007;
+    }
+
+    /* App interior layout & central step dial */
+    .app-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 22px;
+      height: 100%;
+    }
+
+    .computer-screen .app-shell {
+      padding: 24px 32px;
+    }
+
+    .app-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .app-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+
+    .app-pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+    }
+
+    .app-avatar-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .shape-chip {
+      width: 58px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-peach);
+    }
+
+    /* Center Dial Visual */
+    .dial-stage {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      position: relative;
+      min-height: 0;
+    }
+
+    .dial-wrapper {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 248px;
+      height: 248px;
+    }
+
+    .computer-screen .dial-wrapper {
+      width: 268px;
+      height: 268px;
+    }
+
+    .dial-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+
+    .dial-bg-ring {
+      fill: #1f1b1a;
+      stroke: var(--surface-border);
+      stroke-width: 1.5;
+    }
+
+    .dial-track {
+      fill: none;
+      stroke: var(--dial-track);
+      stroke-width: 16;
+    }
+
+    .dial-progress {
+      fill: none;
+      stroke: var(--accent-gold);
+      stroke-width: 16;
+      stroke-linecap: round;
+      /* Circumference for r=92 is ~578; 50% is 289 */
+      stroke-dasharray: 578;
+      stroke-dashoffset: 289;
+      filter: drop-shadow(0 0 10px #d5b27544);
+    }
+
+    .dial-ticks {
+      fill: none;
+      stroke: #534b46;
+      stroke-width: 2;
+      stroke-dasharray: 2 22.08;
+    }
+
+    .dial-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-align: center;
+      padding: 28px;
+    }
+
+    .footsteps-badge {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #2f2926;
+      border: 1px solid #534b46;
+      color: var(--accent-gold);
+      margin-bottom: 2px;
+    }
+
+    .footsteps-badge svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .dial-percent {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .computer-screen .dial-percent {
+      font-size: 42px;
+    }
+
+    .dial-steps {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--accent-peach);
+      margin-top: 2px;
+    }
+
+    .dial-sublabel {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-dim);
+    }
+
+    /* Supporting bottom layout blocks so shapes/layout are recognizable at any scale */
+    .app-bottom-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .computer-screen .app-bottom-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .stat-block {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stat-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--ink-dim);
+      font-weight: 600;
+    }
+
+    .stat-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--accent-blue);
+    }
+
+    .stat-block:nth-child(2) .stat-dot {
+      background: var(--accent-peach);
+    }
+
+    .stat-block:nth-child(3) .stat-dot {
+      background: var(--accent-gold);
+    }
+
+    .stat-bar-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: #1d1918;
+      overflow: hidden;
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent-blue);
+    }
+
+    .stat-block:nth-child(2) .stat-bar-fill {
+      background: var(--accent-peach);
+    }
+
+    .stat-block:nth-child(3) .stat-bar-fill {
+      background: var(--accent-gold);
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    @media (max-width: 1180px) {
+      .page {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      .intro-column {
+        max-width: 640px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Left-side text panel -->
+    <section class="intro-column" aria-label="Feature overview">
+      <div class="eyebrow">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
+        </svg>
+        Daily Quest Progress
+      </div>
+
+      <h1 class="intro-title">Every step fuels your world across devices.</h1>
+
+      <p class="intro-lead">
+        Track your daily movement with a single central completion dial. Whether you check in from your phone on a walk or open your computer at your desk, your 5k/10k step goal stays in sync.
+      </p>
+
+      <div class="intro-meta">
+        <div class="meta-card">
+          <div class="meta-card-value">5k / 10k</div>
+          <div class="meta-card-label">Current daily step milestone (50% complete)</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-card-value">+250 XP</div>
+          <div class="meta-card-label">Midpoint stamina bonus unlocked at 50%</div>
+        </div>
+      </div>
+
+      <div class="swap-hint">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 10l-4-4 4-4"/>
+          <path d="M3 6h11a4 4 0 0 1 4 4v1"/>
+          <path d="M17 14l4 4-4 4"/>
+          <path d="M21 18H10a4 4 0 0 1-4-4v-1"/>
+        </svg>
+        <span>Click the smaller background device on the right to swap places and bring it into focus.</span>
+      </div>
+    </section>
+
+    <!-- Right-side interactive device showcase -->
+    <main class="devices" id="device-stage" data-active="phone" aria-label="Device demos">
+      <!-- Phone Frame -->
+      <figure
+        class="device-preview phone-preview is-active"
+        id="phone-figure"
+        tabindex="0"
+        role="button"
+        aria-pressed="true"
+        aria-label="Phone preview (click to emphasize)"
+      >
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="statusbar" aria-hidden="true">
+              <span>9:41</span>
+              <span class="island"></span>
+              <div class="status-icons">
+                <svg viewBox="0 0 18 14">
+                  <rect x="0" y="10" width="3" height="4" rx=".5"/>
+                  <rect x="5" y="7" width="3" height="7" rx=".5"/>
+                  <rect x="10" y="4" width="3" height="10" rx=".5"/>
+                  <rect x="15" y="1" width="3" height="13" rx=".5"/>
+                </svg>
+                <svg viewBox="0 0 20 15">
+                  <path d="M1 4Q10-3 19 4l-2 2Q10 1 3 6Zm4 4q5-4 10 0l-2 2q-3-2-6 0Zm3 4q2-2 4 0l-2 3Z"/>
+                </svg>
+                <svg class="battery" viewBox="0 0 27 14">
+                  <rect x="1" y="2" width="22" height="10" rx="2" fill="none" stroke="currentColor"/>
+                  <rect x="3" y="4" width="17" height="6" rx="1"/>
+                  <rect x="25" y="5" width="2" height="4" rx="1"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="app-viewport" id="phone-app">
+              <div class="app-shell">
+                <header class="app-topbar">
+                  <div class="app-pill">
+                    <span class="app-pill-dot"></span>
+                    <span class="detail-text">Step Quest</span>
+                  </div>
+                  <div class="app-avatar-bar">
+                    <div class="shape-chip"><span class="detail-text">LVL 12</span></div>
+                  </div>
+                </header>
+
+                <div class="dial-stage">
+                  <div class="dial-wrapper">
+                    <svg class="dial-svg" viewBox="0 0 220 220" aria-hidden="true">
+                      <circle class="dial-bg-ring" cx="110" cy="110" r="102"/>
+                      <circle class="dial-ticks" cx="110" cy="110" r="76"/>
+                      <circle class="dial-track" cx="110" cy="110" r="92"/>
+                      <circle class="dial-progress" cx="110" cy="110" r="92"/>
+                    </svg>
+                    <div class="dial-center">
+                      <div class="footsteps-badge" aria-hidden="true">
+                        <!-- Footsteps icon (24x24 stroke style matching design guide) -->
+                        <svg viewBox="0 0 24 24">
+                          <path d="M8.5 4.5c-1.4 0-2.5 1.3-2.5 3 0 1.4.6 2.3 1 3.5.3.9.4 1.5 1.5 1.5s1.2-.6 1.5-1.5c.4-1.2 1-2.1 1-3.5 0-1.7-1.1-3-2.5-3Z"/>
+                          <circle cx="8.5" cy="15.2" r="1.6"/>
+                          <path d="M15.5 9.5c-1.4 0-2.5 1.3-2.5 3 0 1.4.6 2.3 1 3.5.3.9.4 1.5 1.5 1.5s1.2-.6 1.5-1.5c.4-1.2 1-2.1 1-3.5 0-1.7-1.1-3-2.5-3Z"/>
+                          <circle cx="15.5" cy="20.2" r="1.6"/>
+                        </svg>
+                      </div>
+                      <div class="dial-percent detail-text">50%</div>
+                      <div class="dial-steps detail-text">5k/10k</div>
+                      <div class="dial-sublabel detail-text">Daily Steps</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="app-bottom-grid">
+                  <div class="stat-block">
+                    <div class="stat-block-header">
+                      <span class="detail-text">Distance</span>
+                      <span class="stat-dot"></span>
+                    </div>
+                    <div class="stat-value detail-text">3.8 km</div>
+                    <div class="stat-bar-track">
+                      <div class="stat-bar-fill" style="width: 50%"></div>
+                    </div>
+                  </div>
+                  <div class="stat-block">
+                    <div class="stat-block-header">
+                      <span class="detail-text">Stamina</span>
+                      <span class="stat-dot"></span>
+                    </div>
+                    <div class="stat-value detail-text">+250 XP</div>
+                    <div class="stat-bar-track">
+                      <div class="stat-bar-fill" style="width: 68%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="home-area" aria-hidden="true">
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+        </div>
+        <div class="swap-badge" aria-hidden="true">Click to view Phone</div>
+      </figure>
+
+      <!-- Computer Frame -->
+      <figure
+        class="device-preview computer-preview is-inactive"
+        id="computer-figure"
+        tabindex="0"
+        role="button"
+        aria-pressed="false"
+        aria-label="Computer preview (click to emphasize)"
+      >
+        <div class="computer">
+          <div class="monitor">
+            <div class="computer-screen">
+              <div class="app-viewport" id="computer-app">
+                <div class="app-shell">
+                  <header class="app-topbar">
+                    <div class="app-pill">
+                      <span class="app-pill-dot"></span>
+                      <span class="detail-text">Step Quest — Desktop Hub</span>
+                    </div>
+                    <div class="app-avatar-bar">
+                      <div class="shape-chip"><span class="detail-text">5 Day Streak</span></div>
+                      <div class="shape-chip"><span class="detail-text">LVL 12</span></div>
+                    </div>
+                  </header>
+
+                  <div class="dial-stage">
+                    <div class="dial-wrapper">
+                      <svg class="dial-svg" viewBox="0 0 220 220" aria-hidden="true">
+                        <circle class="dial-bg-ring" cx="110" cy="110" r="102"/>
+                        <circle class="dial-ticks" cx="110" cy="110" r="76"/>
+                        <circle class="dial-track" cx="110" cy="110" r="92"/>
+                        <circle class="dial-progress" cx="110" cy="110" r="92"/>
+                      </svg>
+                      <div class="dial-center">
+                        <div class="footsteps-badge" aria-hidden="true">
+                          <svg viewBox="0 0 24 24">
+                            <path d="M8.5 4.5c-1.4 0-2.5 1.3-2.5 3 0 1.4.6 2.3 1 3.5.3.9.4 1.5 1.5 1.5s1.2-.6 1.5-1.5c.4-1.2 1-2.1 1-3.5 0-1.7-1.1-3-2.5-3Z"/>
+                            <circle cx="8.5" cy="15.2" r="1.6"/>
+                            <path d="M15.5 9.5c-1.4 0-2.5 1.3-2.5 3 0 1.4.6 2.3 1 3.5.3.9.4 1.5 1.5 1.5s1.2-.6 1.5-1.5c.4-1.2 1-2.1 1-3.5 0-1.7-1.1-3-2.5-3Z"/>
+                            <circle cx="15.5" cy="20.2" r="1.6"/>
+                          </svg>
+                        </div>
+                        <div class="dial-percent detail-text">50%</div>
+                        <div class="dial-steps detail-text">5k/10k</div>
+                        <div class="dial-sublabel detail-text">Daily Steps</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="app-bottom-grid">
+                    <div class="stat-block">
+                      <div class="stat-block-header">
+                        <span class="detail-text">Distance Walked</span>
+                        <span class="stat-dot"></span>
+                      </div>
+                      <div class="stat-value detail-text">3.8 km / 7.6 km</div>
+                      <div class="stat-bar-track">
+                        <div class="stat-bar-fill" style="width: 50%"></div>
+                      </div>
+                    </div>
+                    <div class="stat-block">
+                      <div class="stat-block-header">
+                        <span class="detail-text">Quest Stamina</span>
+                        <span class="stat-dot"></span>
+                      </div>
+                      <div class="stat-value detail-text">+250 XP Earned</div>
+                      <div class="stat-bar-track">
+                        <div class="stat-bar-fill" style="width: 68%"></div>
+                      </div>
+                    </div>
+                    <div class="stat-block">
+                      <div class="stat-block-header">
+                        <span class="detail-text">Guild Pace</span>
+                        <span class="stat-dot"></span>
+                      </div>
+                      <div class="stat-value detail-text">On Track</div>
+                      <div class="stat-bar-track">
+                        <div class="stat-bar-fill" style="width: 80%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="taskbar" aria-hidden="true">
+                <div class="taskbar-apps">
+                  <span class="taskbar-app taskbar-launcher">
+                    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                      <path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z" fill="currentColor" stroke="none"/>
+                    </svg>
+                  </span>
+                  <span class="taskbar-app">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="10.5" cy="10.5" r="6.5"/>
+                      <path d="m16 16 5 5"/>
+                    </svg>
+                  </span>
+                  <span class="taskbar-app taskbar-folder">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M3 7V5h6l2 2h10v12H3Z" fill="currentColor" stroke="none" opacity=".65"/>
+                      <path d="M3 10h18v9H3Z" fill="currentColor" stroke="none"/>
+                    </svg>
+                  </span>
+                  <span class="taskbar-app taskbar-browser">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9"/>
+                      <ellipse cx="12" cy="12" rx="4" ry="9"/>
+                      <path d="M3 12h18"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="system-tray">
+                  <svg viewBox="0 0 24 24">
+                    <path d="m8 14 4-4 4 4"/>
+                  </svg>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 9a14 14 0 0 1 18 0M6 12a9 9 0 0 1 12 0m-9 3a4.5 4.5 0 0 1 6 0"/>
+                    <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/>
+                  </svg>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 9h4l5-4v14l-5-4H4Zm12 0a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/>
+                  </svg>
+                  <span class="taskbar-clock">9:41 AM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="monitor-stand" aria-hidden="true"></div>
+          <div class="monitor-base" aria-hidden="true"></div>
+        </div>
+        <div class="swap-badge" aria-hidden="true">Click to view Computer</div>
+      </figure>
+    </main>
+  </div>
+
+  <script>
+    const stage = document.getElementById('device-stage');
+    const phoneFigure = document.getElementById('phone-figure');
+    const computerFigure = document.getElementById('computer-figure');
+
+    function setActiveDevice(device) {
+      stage.dataset.active = device;
+      const isPhone = device === 'phone';
+
+      phoneFigure.classList.toggle('is-active', isPhone);
+      phoneFigure.classList.toggle('is-inactive', !isPhone);
+      phoneFigure.setAttribute('aria-pressed', String(isPhone));
+
+      computerFigure.classList.toggle('is-active', !isPhone);
+      computerFigure.classList.toggle('is-inactive', isPhone);
+      computerFigure.setAttribute('aria-pressed', String(!isPhone));
+    }
+
+    phoneFigure.addEventListener('click', () => {
+      if (stage.dataset.active !== 'phone') {
+        setActiveDevice('phone');
+      }
+    });
+
+    computerFigure.addEventListener('click', () => {
+      if (stage.dataset.active !== 'computer') {
+        setActiveDevice('computer');
+      }
+    });
+
+    [phoneFigure, computerFigure].forEach((el) => {
+      el.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          const targetDevice = el === phoneFigure ? 'phone' : 'computer';
+          if (stage.dataset.active !== targetDevice) {
+            setActiveDevice(targetDevice);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
